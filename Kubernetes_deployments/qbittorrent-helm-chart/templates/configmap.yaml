@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.persistence.configMap.name }}
+  namespace: {{ .Values.namespace }}
+data:
+  wg0.conf: |
+    [Interface]
+    Address = {{ .Values.wireguard.address }}
+    PrivateKey = {{ .Values.wireguard.privateKey }}
+    MTU = {{ .Values.wireguard.mtu }}
+    DNS = {{ .Values.wireguard.dns }}
+    ListenPort = {{ .Values.wireguard.listenPort }}
+
+    [Peer]
+    PublicKey = {{ .Values.wireguard.peerPublicKey }}
+    PresharedKey = {{ .Values.wireguard.presharedKey }}
+    AllowedIPs = {{ .Values.wireguard.allowedIPs }}
+    Endpoint = {{ .Values.wireguard.endpoint }}
+    PersistentKeepalive = {{  .Values.wireguard.persistentKeepalive }}

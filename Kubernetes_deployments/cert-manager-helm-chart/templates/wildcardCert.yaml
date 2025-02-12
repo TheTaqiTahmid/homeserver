@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Values.wildcardCert.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  secretName: {{ .Values.wildcardCert.secretName }}
+  issuerRef:
+    name: {{ .Values.clusterIssuer.name }}
+    kind: ClusterIssuer
+  dnsNames:
+    {{- range .Values.wildcardCert.dnsNames }}
+    - "{{ . }}"
+    {{- end }}

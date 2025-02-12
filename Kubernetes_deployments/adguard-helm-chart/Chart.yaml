@@ -1,0 +1,6 @@
+apiVersion: v2
+name: adguard
+description: A Helm chart for deploying AdGuard Home
+type: application
+version: 0.1.0
+appVersion: "latest"

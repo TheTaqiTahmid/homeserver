@@ -1,0 +1,58 @@
+apiVersion: v1
+appVersion: "latest"
+description: A Helm chart for deploying AdGuard Home
+name: adguard-home
+namespace: adguard
+version: 0.1.0
+
+replicaCount: 1
+host: adguard.example.com  # Change this to your domain
+
+deployment:
+  adminContainerPort: 3000
+  httpContainerPort: 80
+  dns:
+    tcp: 53
+    udp: 53
+  labels:
+    app: adguard-home
+
+image:
+  repository: adguard/adguardhome
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 80
+  adminTargetPort: 3000
+  webUiPort: 80
+  dnsPort:
+    udp: 53
+    tcp: 53
+
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/affinity: "true"
+    traefik.ingress.kubernetes.io/session-cookie-name: "SESSIONID"
+  hosts:
+    - host: 
+      paths:
+        - /
+  tls:
+    enabled: true
+    secretName: wildcard-cert-secret
+
+pvc:
+  claimName: adguard-pvc
+  enabled: true
+  storageClass: longhorn
+  accessModes: ReadWriteOnce
+  size: 1Gi
+
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

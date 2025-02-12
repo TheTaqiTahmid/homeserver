@@ -1,0 +1,21 @@
+namespace: cert-manager
+
+clusterIssuer:
+  name: acme-issuer
+  server: https://acme-v02.api.letsencrypt.org/directory
+  privateKeySecretRef: example-issuer-account-key
+  email: EMAIL
+  apiTokenSecretRef:
+    name: cloudflare-api-token-secret
+    key: api-token
+
+wildcardCert:
+  name: wildcard-cert
+  secretName: wildcard-cert-secret
+  dnsNames:
+    - ".example.com"
+
+secret:
+  type: Opaque
+  name: cloudflare-api-token-secret
+  apiToken: base64encodedtoken

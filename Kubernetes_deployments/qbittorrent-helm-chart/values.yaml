@@ -1,0 +1,60 @@
+replicaCount: 1
+namespace: media
+
+deployment:
+  labels:
+    app: qbittorrent
+  containerPort: 8080
+  image:
+    repository: linuxserver/qbittorrent
+    tag: latest
+    pullPolicy: Always
+
+qbittorrentImage:
+  repository: linuxserver/qbittorrent
+  tag: latest
+  pullPolicy:   Always
+
+wireguardImage:
+  repository: linuxserver/wireguard
+  tag: latest
+  pullPolicy: Always
+
+service:
+  name: qbittorrent-service
+  type: LoadBalancer
+  port: 8080
+  wireguardPort: 51820
+
+persistence:
+  config:
+    enabled: true
+    name: qbittorrent-config-pvc
+    accessMode: ReadWriteOnce
+    size: 1Gi
+    storageClass: longhorn
+  downloads:
+    enabled: true
+    existingClaim: media-nfs-pvc
+  configMap:
+    enabled: true
+    name: wireguard-config
+
+config:
+  puid: 1000
+  pgid: 1000
+  timezone: Europe/Helsinki
+  umask: 022
+  webuiPort: 8080
+
+wireguard:
+  address: 10.182.199.210/32
+  privateKey: WNDT2JsSZWw4q5EgsUKkBEX1hpWlpJGUTV/ibfJZOVo=
+  mtu: 1329
+  dns: 10.128.0.1
+  listenPort: 51820
+  peerPublicKey: PyLCXAQT8KkM4T+dUsOQfn+Ub3pGxfGlxkIApuig+hk=
+  presharedKey: jSEf0xVUv/LwLmybp+LSM21Q2VOPbWPGcI/Dc4LLGkM=
+  endpoint: europe3.vpn.airdns.org:1637
+  allowedIPs: 0.0.0.0/0
+  persistentKeepalive: 15

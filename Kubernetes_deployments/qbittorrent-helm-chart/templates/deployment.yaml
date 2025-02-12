@@ -1,0 +1,125 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      initContainers:
+        - name: wireguard-init
+          image: {{ .Values.wireguardImage.repository }}:{{ .Values.wireguardImage.tag }}
+          imagePullPolicy: {{ .Values.wireguardImage.pullPolicy }}
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - NET_ADMIN
+                - SYS_MODULE
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -x
+              echo "Starting WireGuard initialization..."
+              mkdir -p /etc/wireguard
+              cp /config/wg_confs/wg0.conf /etc/wireguard/wg0.conf
+              chmod 600 /etc/wireguard/wg0.conf
+
+              if ! lsmod | grep -q wireguard; then
+                  modprobe wireguard || echo "Failed to load wireguard module"
+              fi
+
+              wg-quick up wg0 || echo "Failed to bring up WireGuard interface"
+
+              ip link show wg0
+              wg show
+          volumeMounts:
+            - name: wireguard-config
+              mountPath: /config/wg_confs
+            - name: modules
+              mountPath: /lib/modules
+      containers:
+        - name: wireguard
+          image: {{ .Values.wireguardImage.repository }}:{{ .Values.wireguardImage.tag }}
+          imagePullPolicy: {{ .Values.wireguardImage.pullPolicy }}
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - NET_ADMIN
+                - SYS_MODULE
+          env:
+            - name: PUID
+              value: "{{ .Values.config.puid }}"
+            - name: PGID
+              value: "{{ .Values.config.pgid }}"
+            - name: UMASK_SET
+              value: "{{ .Values.config.umask }}"
+            - name: TZ
+              value: "{{ .Values.config.timezone }}"
+          volumeMounts:
+            - name: wireguard-config
+              mountPath: /config/wg_confs
+            - name: modules
+              mountPath: /lib/modules
+          command:
+            - /bin/sh
+            - -c
+            - |
+              while true; do
+                if ! ip link show wg0 > /dev/null 2>&1; then
+                  wg-quick up wg0
+                fi
+                sleep 30
+              done
+          ports:
+            - containerPort: {{ .Values.service.wireguardPort }}
+              protocol: UDP
+        - name: qbittorrent
+          image: {{ .Values.qbittorrentImage.repository }}:{{ .Values.qbittorrentImage.tag }}
+          imagePullPolicy: {{ .Values.qbittorrentImage.pullPolicy }}
+          env:
+            - name: PUID
+              value: "{{ .Values.config.puid }}"
+            - name: PGID
+              value: "{{ .Values.config.pgid }}"
+            - name: TZ
+              value: "{{ .Values.config.timezone }}"
+            - name: WEBUI_PORT
+              value: "{{ .Values.config.webuiPort }}"
+          volumeMounts:
+            - name: qbittorrent-config
+              mountPath: /config
+            - name: downloads
+              mountPath: /downloads
+          ports:
+            - containerPort: {{ .Values.deployment.containerPort }}
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.deployment.containerPort }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+      volumes:
+        - name: qbittorrent-config
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.config.name }}
+        - name: wireguard-config
+          configMap:
+            name: {{ .Values.persistence.configMap.name }}
+        - name: downloads
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.downloads.existingClaim }}
+        - name: modules
+          hostPath:
+            path: /lib/modules

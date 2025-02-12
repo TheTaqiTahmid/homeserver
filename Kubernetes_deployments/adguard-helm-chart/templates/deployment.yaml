@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-home
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.deployment.labels.app }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.deployment.labels.app }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.deployment.labels.app }}
+    spec:
+      containers:
+        - name: {{ .Values.deployment.labels.app }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          ports:
+            - containerPort: {{ .Values.deployment.adminContainerPort }}
+              protocol: TCP
+              name: admin
+            - containerPort: {{ .Values.deployment.httpContainerPort }}
+              name: http
+              protocol: TCP
+            - containerPort: {{ .Values.deployment.dns.tcp }}
+              name: dns-tcp
+              protocol: TCP
+            - containerPort: {{ .Values.deployment.dns.udp }}
+              name: dns-udp
+              protocol: UDP
+          volumeMounts:
+            - name: adguard-config
+              mountPath: /opt/adguardhome/conf
+            - name: adguard-work
+              mountPath: /opt/adguardhome/work
+      volumes:
+        - name: adguard-config
+          persistentVolumeClaim:
+            claimName: {{ .Values.pvc.claimName }}
+        - name: adguard-work
+          emptyDir: {}

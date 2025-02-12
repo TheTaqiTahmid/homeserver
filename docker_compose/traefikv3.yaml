@@ -1,0 +1,96 @@
+version: '3.8'
+
+networks:
+  t3_proxy:
+    name: t3_proxy
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.90.0/24
+
+secrets:
+  basic_auth_credentials:
+    file: $DOCKERDIR/secrets/basic_auth_credentials
+  cf_dns_api_token:
+    file: $DOCKERDIR/secrets/cf_dns_api_token
+
+services:
+  traefik:
+    container_name: traefik
+    image: traefik:3.0
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    networks:
+      t3_proxy:
+        ipv4_address: 192.168.90.254
+    command:
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.traefik.address=:8080
+      - --entrypoints.websecure.http.tls=true
+      # The following two options redirects http request at port 80 to https
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.web.http.redirections.entrypoint.permanent=true
+      - --api=true
+      - --api.dashboard=true
+      # - --api.insecure=true
+      - --entrypoints.websecure.forwardedHeaders.trustedIPs=$CLOUDFLARE_IPS,$LOCAL_IPS
+      - --log=true
+      - --log.filePath=/logs/traefik.log
+      - --log.level=DEBUG
+      - --accessLog=true
+      - --accessLog.filePath=/logs/access.log
+      - --accessLog.bufferingSize=100
+      - --accessLog.filters.statusCodes=204-299,400-499,500-599
+      - --providers.docker=true
+      - --providers.docker.network=t3_proxy
+      - --entrypoints.websecure.http.tls.options=tls-opts@file
+      - --entrypoints.websecure.http.tls.certresolver=dns-cloudflare
+      - --entrypoints.websecure.http.tls.domains[0].main=$DOMAINNAME
+      - --entrypoints.websecure.http.tls.domains[0].sans=*.$DOMAINNAME
+      - --providers.file.directory=/rules
+      - --providers.file.watch=true
+      - --certificatesResolvers.dns-cloudflare.acme.storage=/acme.json
+      - --certificatesResolvers.dns-cloudflare.acme.dnsChallenge.provider=cloudflare
+      - --certificatesResolvers.dns-cloudflare.acme.dnsChallenge.resolvers=1.1.1.1:53,1.0.0.1:53
+    ports:
+      # - 80:80
+      - 443:443
+      - 8080:8080
+      # - target: 80
+      #   published: 80
+      #   protocol: tcp
+      #   mode: host
+      # - target: 443
+      #   published: 443
+      #   protocol: tcp
+      #   mode: host
+      # - target: 8080
+      #   published: 8585
+      #   protocol: tcp
+      #   mode: host
+    volumes:
+      - $DOCKERDIR/appdata/traefik3/rules/$HOSTNAME:/rules
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - $DOCKERDIR/appdata/traefik3/acme/acme.json:/acme.json
+      - $DOCKERDIR/logs/$HOSTNAME/traefik:/logs
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=$TZ
+      - CF_DNS_API_TOKEN_FILE=/run/secrets/cf_dns_api_token
+      - HTPASSWD_FILE=/run/secrets/basic_auth_credentials
+      - DOMAINNAME=${DOMAINNAME}
+    secrets:
+      - cf_dns_api_token
+      - basic_auth_credentials
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.tls=true" 
+      - "traefik.http.routers.traefik-rtr.entrypoints=websecure"
+      - "traefik.http.routers.traefik-rtr.rule=Host(`traefik.${DOMAINNAME}`)"
+      - "traefik.http.routers.traefik-rtr.service=api@internal"
+        # Middlewares
+      - "traefik.http.routers.traefik-rtr.middlewares=middlewares-rate-limit@file,middlewares-secure-headers@file,middlewares-basic-auth@file"

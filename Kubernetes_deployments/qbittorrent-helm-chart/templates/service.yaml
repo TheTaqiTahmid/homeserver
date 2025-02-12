@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.service.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: {{ .Release.Name }}
+  ports:
+    - protocol: TCP
+      name: qbittorrent
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.deployment.containerPort }}
+    - protocol: UDP
+      name: wireguard
+      port: {{ .Values.service.wireguardPort }}
+      targetPort: {{ .Values.service.wireguardPort }}
+  type: {{ .Values.service.type }}

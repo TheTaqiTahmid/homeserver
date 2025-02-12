@@ -1,0 +1,70 @@
+---
+- name: Download cloud image
+  get_url:
+    url: "{{ image_url }}"
+    dest: "{{ image_dest }}"
+    use_netrc: yes
+
+- name: create VMs
+  delegate_to: localhost
+  vars:
+    ansible_python_interpreter: /home/taqi/.venv/ansible/bin/python
+  community.general.proxmox_kvm:
+    api_host: "{{ proxmox_api_url }}"
+    api_user: "{{ proxmox_user }}"
+    api_token_id: "{{ proxmox_api_token_id }}"
+    api_token_secret: "{{ proxmox_api_token }}"
+    node: "{{ node }}"
+    vmid: "{{ item.id }}"
+    name: "{{ item.name }}"
+    memory: "{{ item.memory }}"
+    cores: "{{ item.cores }}"
+    scsihw: "{{ scsi_hw }}"
+    boot: "{{ boot_order }}"
+    net:
+      net0: "{{ net0 }}"
+    ipconfig:
+      ipconfig0: "ip={{ item.ip }},gw={{ item.gateway }}"
+    ide:
+      ide2: "{{ ide2 }}"
+    nameservers: "{{ item.nameserver1 }},{{ item.nameserver2 }}"
+    ciuser: "{{ ciuser }}"
+    cipassword: "{{ cipassword }}"
+    sshkeys: "{{ lookup('file', '/home/taqi/.ssh/homeserver.pub') }}"
+  loop: "{{ vm_list }}"
+
+- name: Import disk image
+  ansible.builtin.shell: |
+    qm importdisk "{{ item.id }}" "{{ image_dest }}" "{{ storage_name }}" --format "{{ image_format }}"
+  loop: "{{ vm_list }}"
+
+- name: Attach disk to VM
+  ansible.builtin.shell: |
+    qm set "{{ item.id }}" --scsi0 "{{ storage_name }}:{{ item.id }}/vm-{{ item.id }}-disk-0.{{ image_format }},discard=on"
+  loop: "{{ vm_list }}"
+
+- name: Resize disk
+  ansible.builtin.shell: |
+    qm resize {{ item.id }} scsi0 {{ item.disk_size }}
+  loop: "{{ vm_list }}"
+
+- name: Start VMs
+  delegate_to: localhost
+  vars:
+    ansible_python_interpreter: /home/taqi/.venv/ansible/bin/python
+  community.general.proxmox_kvm:
+    api_host: "{{ proxmox_api_url }}"
+    api_user: "{{ proxmox_user }}"
+    api_token_id: "{{ proxmox_api_token_id }}"
+    api_token_secret: "{{ proxmox_api_token }}"
+    node: "{{ node }}"
+    name: "{{ item.name }}"
+    state: started
+  loop: "{{ vm_list }}"
+  tags:
+    - start_vms
+
+- name: Clean up downloaded image
+  file:
+    path: "{{ image_dest }}"
+    state: absent

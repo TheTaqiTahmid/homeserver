@@ -1,0 +1,105 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pgadmin-secret
+type: Opaque
+stringData:
+  pgadmin-password: "${PGADMIN_PASSWORD}"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pgadmin-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgadmin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pgadmin
+  template:
+    metadata:
+      labels:
+        app: pgadmin
+    spec:
+      securityContext:
+        fsGroup: 5050        # pgAdmin group ID
+        runAsUser: 5050      # pgAdmin user ID
+      initContainers:
+        - name: init-chmod
+          image: busybox
+          command: ["sh", "-c", "chown -R 5050:5050 /var/lib/pgadmin"]
+          volumeMounts:
+            - name: pgadmin-data
+              mountPath: /var/lib/pgadmin
+          securityContext:
+            runAsUser: 0     # Run as root for chmod
+      containers:
+        - name: pgadmin
+          image: dpage/pgadmin4:latest
+          env:
+            - name: SCRIPT_NAME
+              value: /console
+            - name: PGADMIN_DEFAULT_EMAIL
+              value: "${PGADMIN_EMAIL}"
+            - name: PGADMIN_DEFAULT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pgadmin-secret
+                  key: pgadmin-password
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: pgadmin-data
+              mountPath: /var/lib/pgadmin
+          securityContext:
+            runAsUser: 5050    # pgAdmin user ID
+            runAsGroup: 5050   # pgAdmin group ID
+      volumes:
+        - name: pgadmin-data
+          persistentVolumeClaim:
+            claimName: pgadmin-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgadmin-service
+spec:
+  type: LoadBalancer  # or NodePort based on your setup
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: pgadmin
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pgadmin-ingress
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  tls:
+  - hosts:
+      - "${DNSNAME}"
+    secretName: wildcard-cert-secret
+  rules:
+  - host: "${PGADMIN_HOST}"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: pgadmin-service
+            port:
+              number: 80

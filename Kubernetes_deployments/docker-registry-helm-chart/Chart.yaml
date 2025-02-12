@@ -1,0 +1,5 @@
+apiVersion: v2
+name: docker-registry-helm-chart
+description: A Helm chart for deploying a Docker registry
+version: 0.1.0
+appVersion: "latest"

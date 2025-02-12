@@ -1,0 +1,37 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-service
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: {{ .Release.Name }}-home
+  ports:
+    - port: {{ .Values.service.dnsPort.udp }}
+      targetPort: {{ .Values.service.dnsPort.udp }}
+      protocol: UDP
+      name: dns-udp
+    - port: {{ .Values.service.dnsPort.tcp }}
+      targetPort: {{ .Values.service.dnsPort.tcp }}
+      protocol: TCP
+      name: dns-tcp
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.adminTargetPort }}
+      protocol: TCP
+      name: admin
+  type: {{ .Values.service.type }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-web-ui
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: {{ .Release.Name }}-home
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.webUiPort }}
+      protocol: TCP
+      name: http

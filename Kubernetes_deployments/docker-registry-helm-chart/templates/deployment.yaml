@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.deployment.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.name }}
+    spec:
+      containers:
+        - name: {{ .Values.name }}
+          image: {{ .Values.deployment.image }}
+          ports:
+            - containerPort: {{ .Values.deployment.containerPort }}
+          env:
+            - name: REGISTRY_AUTH
+              value: "htpasswd"
+            - name: REGISTRY_AUTH_HTPASSWD_REALM
+              value: "Registry Realm"
+            - name: REGISTRY_AUTH_HTPASSWD_PATH
+              value: "/auth/registry-passwords"
+            - name: REGISTRY_AUTH_HTPASSWD_FILE
+              value: "/auth/registry-passwords"
+            - name: REGISTRY_HTTP_HEADERS
+              value: |
+                Access-Control-Allow-Origin: ['{{ .Values.uiDomain }}']
+                Access-Control-Allow-Methods: ['HEAD', 'GET', 'OPTIONS', 'DELETE', 'POST', 'PUT']
+                Access-Control-Allow-Headers: ['Authorization', 'Accept', 'Content-Type', 'X-Requested-With', 'Cache-Control']
+                Access-Control-Max-Age: [1728000]
+                Access-Control-Allow-Credentials: [true]
+                Access-Control-Expose-Headers: ['Docker-Content-Digest']
+          volumeMounts:
+            - name: {{ .Values.deployment.registryStorageVolumeName }}
+              mountPath: /var/lib/registry
+            - name: {{ .Values.deployment.authStorageVolumeName }}
+              mountPath: /auth
+      volumes:
+        - name: {{ .Values.deployment.registryStorageVolumeName }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.pvc.claimName }}
+        - name: {{ .Values.deployment.authStorageVolumeName }}
+          secret:
+            secretName: {{ .Values.credentialSecret.name }}

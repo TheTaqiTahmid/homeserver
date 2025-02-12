@@ -1,0 +1,19 @@
+version: "3"
+services:
+    sonarr:
+      image: "linuxserver/sonarr"
+      container_name: "sonarr"
+      env_file:
+          ./.env
+      volumes:
+        - ${DOCKERDIR}/appdata/sonarr:/config
+        - ${DATADIR}/downloads:/downloads
+        - ${DATADIR}/tvshows:/tvshows
+        - "/etc/localtime:/etc/localtime:ro"
+      ports:
+          - "8989:8989"
+      restart: always
+      environment:
+        - PUID=${PUID}
+        - PGID=${PGID}
+        - TZ=${TZ}

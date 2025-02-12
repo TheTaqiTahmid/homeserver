@@ -1,0 +1,52 @@
+version: "3"
+
+services:
+  wireguard:
+    image: linuxserver/wireguard:latest
+    container_name: wireguard
+    env_file:
+        ./.env
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=Europe/Helsinki
+    volumes:
+      - ${WIREGUARD_CONFIG}:/config/wg0.conf
+      - /lib/modules:/lib/modules
+    ports:
+      - 51820:51820/udp
+      - 9500:9500  # qbittorrent
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+      - net.ipv6.conf.all.disable_ipv6=0
+    restart: unless-stopped
+    networks:
+      dockercompose_default:
+        ipv4_address: 172.18.0.100
+
+
+  qbittorrent: 
+    image: "linuxserver/qbittorrent"
+    container_name: "qbittorrent"
+    env_file:
+        ./.env
+    volumes:
+      - ${DOCKERDIR}/appdata/qbittorrent:/config
+      - ${DATADIR}/downloads:/downloads
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK_SET=002
+      - WEBUI_PORT=9500
+    network_mode: service:wireguard 
+    depends_on:
+      - wireguard
+
+networks:
+  dockercompose_default:
+    external: true

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.deployment.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.deployment.labels.app }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.deployment.labels.app }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.deployment.labels.app }}
+    spec:
+      containers:
+      - name: pocketbase
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        ports:
+        - containerPort: {{ .Values.deployment.containerPort }}
+        volumeMounts:
+        - name: {{ .Values.pvc.name }}
+          mountPath: {{ index .Values.deployment.volumeMounts 0 "mountPath" }}
+      volumes:
+      - name: {{ .Values.pvc.name }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.persistence.name }}

@@ -1,0 +1,21 @@
+version: "3"
+services:  
+  radarr:
+    image: "linuxserver/radarr"
+    container_name: "radarr"
+    env_file:
+        ./.env
+    volumes:
+      - ${DOCKERDIR}/appdata/radarr:/config
+      - ${DATADIR}/downloads:/downloads
+      - ${DATADIR}/movies:/movies
+      - "/etc/localtime:/etc/localtime:ro"
+    ports:
+      - "7878:7878"
+    restart: always
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    networks:
+      - bridge

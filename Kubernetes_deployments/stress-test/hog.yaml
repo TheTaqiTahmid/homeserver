@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+  generation: 1
+  labels:
+    app: hog
+  name: hog
+  namespace: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hog
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: hog
+    spec:
+      containers:
+      - image: vish/stress
+        imagePullPolicy: Always
+        name: stress
+        resources:
+          limits:
+            memory: "1Gi"
+          requests:
+            memory: "500Mi"
+        args:
+        - -cpus
+        - "2"
+        - -mem-total
+        - "1250Mi"
+        - -mem-alloc-size
+        - "100Mi"
+        - -mem-alloc-sleep
+        - "1s"
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30

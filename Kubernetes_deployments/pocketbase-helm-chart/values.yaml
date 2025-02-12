@@ -1,0 +1,43 @@
+replicaCount: 1
+namespace: pocketbase
+
+deployment:
+  name: pocketbase
+  containerPort: 8090
+  labels:
+    app: pocketbase
+  volumeMounts:
+    - mountPath: /pb_data
+
+image:
+  repository: ghcr.io/muchobien/pocketbase
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  name: pocketbase
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  name: pocketbase-ingress
+  className: traefik
+  annotations: {}
+  host: pocketbase.example.com
+  path: /
+  pathType: Prefix
+  tls:
+    enabled: true
+    secretName: wildcard-cert-secret
+    hosts:
+      - "*.example.com"
+
+persistence:
+  enabled: true
+  name: pocketbase-pvc
+  accessMode: ReadWriteOnce
+  size: 5Gi
+
+pvc:
+  name: pocketbase-data

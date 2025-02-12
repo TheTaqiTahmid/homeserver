@@ -1,0 +1,34 @@
+name: registry
+namespace: docker-registry
+storage: 5Gi
+host: registry.example.com
+
+deployment:
+  replicas: 1
+  containerPort: 5000
+  image: registry:2
+  registryStorageVolumeName: registry-storage
+  authStorageVolumeName: auth-storage
+
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+  tls:
+    enabled: true
+    host: "*.example.com"
+    secretName: wildcard-cert-secret
+
+service:
+  type: ClusterIP
+  port: 5000
+
+pvc:
+  claimName: registry-pvc
+  enabled: true
+  storageClass: longhorn
+  accessMode: ReadWriteOnce
+  size: 5Gi
+
+credentialSecret:
+  name: registry-credentials

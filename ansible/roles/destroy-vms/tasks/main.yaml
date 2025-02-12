@@ -1,0 +1,59 @@
+---
+- name: Get VM current state
+  delegate_to: localhost
+  vars:
+    ansible_python_interpreter: "{{ ansible_venv }}"
+  community.general.proxmox_kvm:
+    api_host: "{{ proxmox_api_url }}"
+    api_user: "{{ proxmox_user }}"
+    api_token_id: "{{ proxmox_api_token_id }}"
+    api_token_secret: "{{ proxmox_api_token }}"
+    name: "{{ item.name }}"
+    node: "{{ node }}"
+    state: current
+  register: vm_state
+  ignore_errors: yes
+  loop: "{{ vm_list }}"
+  tags:
+    - vm_delete
+
+- name: Debug VM state
+  debug:
+    msg: "VM state: {{ vm_state.results[0].status }}"
+  when: vm_state is succeeded
+  loop: "{{ vm_list }}"
+
+- name: Stop VM
+  delegate_to: localhost
+  vars:
+    ansible_python_interpreter: "{{ ansible_venv }}"
+  community.general.proxmox_kvm:
+    api_host: "{{ proxmox_api_url }}"
+    api_user: "{{ proxmox_user }}"
+    api_token_id: "{{ proxmox_api_token_id }}"
+    api_token_secret: "{{ proxmox_api_token }}"
+    name: "{{ item.name }}"
+    node: "{{ node }}"
+    state: stopped
+    force: true
+  when: vm_state is succeeded and vm_state.results[0].status != 'absent'
+  loop: "{{ vm_list }}"
+  tags:
+    - vm_delete
+
+- name: Delete VM
+  delegate_to: localhost
+  vars:
+    ansible_python_interpreter: "{{ ansible_venv }}"
+  community.general.proxmox_kvm:
+    api_host: "{{ proxmox_api_url }}"
+    api_user: "{{ proxmox_user }}"
+    api_token_id: "{{ proxmox_api_token_id }}"
+    api_token_secret: "{{ proxmox_api_token }}"
+    name: "{{ item.name }}"
+    node: "{{ node }}"
+    state: absent
+  when: vm_state is succeeded and vm_state.results[0].status != 'absent'
+  loop: "{{ vm_list }}"
+  tags:
+    - vm_delete

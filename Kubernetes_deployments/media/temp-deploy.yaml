@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: media-transfer-pod
+spec:
+  restartPolicy: Never
+  containers:
+  - name: media-transfer
+    image: alpine  # Use a lightweight image
+    command: ["/bin/sh", "-c", "sleep 3600"]  # Keep the pod alive
+    volumeMounts:
+      - name: plex-media
+        mountPath: /mnt/longhorn
+      - name: existing-media
+        mountPath: /mnt/existing
+  volumes:
+    - name: plex-media
+      persistentVolumeClaim:
+        claimName: plex-media-longhorn
+    - name: existing-media
+      persistentVolumeClaim:
+        claimName: plex-media-pvc

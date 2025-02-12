@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jellyfin-network-config
+data:
+  network.xml: |
+    <?xml version="1.0" encoding="utf-8"?>
+    <NetworkConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+      <BaseUrl>/</BaseUrl>
+      <EnableHttps>true</EnableHttps>
+      <RequireHttps>true</RequireHttps>
+      <InternalHttpPort>8096</InternalHttpPort>
+      <InternalHttpsPort>8920</InternalHttpsPort>
+      <PublicHttpPort>80</PublicHttpPort>
+      <PublicHttpsPort>443</PublicHttpsPort>
+      <EnableRemoteAccess>true</EnableRemoteAccess>
+      <EnablePublishedServerUriByRequest>true</EnablePublishedServerUriByRequest>
+      <PublishedServerUri>https://${JELLYFIN_HOST}</PublishedServerUri>
+    </NetworkConfiguration>
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jellyfin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jellyfin
+  template:
+    metadata:
+      labels:
+        app: jellyfin
+    spec:
+      containers:
+        - name: jellyfin
+          image: jellyfin/jellyfin:latest
+          ports:
+            - containerPort: 8096
+          volumeMounts:
+            - name: plex-media
+              mountPath: /media
+            - name: config
+              mountPath: /config
+            - name: network-config
+              mountPath: /config/config/    network.xml
+              subPath: network.xml
+      volumes:
+        - name: plex-media
+          persistentVolumeClaim:
+            claimName: media-nfs-pvc
+        - name: config
+          persistentVolumeClaim:
+            claimName: plex-config-pvc
+        - name: network-config
+          configMap:
+            name: jellyfin-network-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jellyfin-service
+spec:
+  selector:
+    app: jellyfin
+  ports:
+    - protocol: TCP
+      port: 8096
+      targetPort: 8096
+  type: ClusterIP
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: jellyfin-ingress
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: jellyfin-headers@kubernetescrd
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`${JELLYFIN_HOST}`)
+      kind: Rule
+      services:
+        - name: jellyfin-service
+          port: 8096
+  tls:
+    secretName: wildcard-cert-secret
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: jellyfin-headers
+spec:
+  headers:
+    customRequestHeaders:
+      X-Forwarded-Proto: "https"
+    customResponseHeaders:
+      X-Frame-Options: "SAMEORIGIN"

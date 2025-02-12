@@ -1,0 +1,40 @@
+version: '3.5'
+services:
+  plex:
+    image: plexinc/pms-docker 
+    container_name: plex
+    env_file:
+        ./.env
+    environment:
+      - PLEX_UID=${PUID}
+      - PLEX_GID=${PGID}
+      - TZ=${TZ}
+      - VERSION=docker
+      - PLEX_CLAIM=${PLEX_CLAIM}
+    ports:
+      - "32400:32400/tcp"
+      - "3005:3005/tcp"
+      - "8324:8324/tcp"
+      - "32469:32469/tcp"
+      - "1899:1900/udp"
+      - "32410:32410/udp"
+      - "32412:32412/udp"
+      - "32413:32413/udp"
+      - "32414:32414/udp"
+    volumes:
+      - ${DOCKERDIR}/appdata/plex:/config
+      - ${DATADIR}/tvshows:/tv
+      - ${DATADIR}/movies:/movies
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.plex-rtr.rule=Host(`plex.${DOMAINNAME}`)"
+      - "traefik.http.routers.plex-rtr.entrypoints=websecure"
+      - "traefik.http.routers.plex-rtr.service=plex-svc"
+      - "traefik.http.services.plex-svc.loadbalancer.server.port=32400"
+      - "traefik.http.routers.traefik-rtr.middlewares=middlewares-rate-limit@file,middlewares-secure-headers@file"
+    networks:
+      - t3_proxy
+networks:
+  t3_proxy:
+    external: true

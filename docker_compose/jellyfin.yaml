@@ -1,0 +1,38 @@
+  services:
+    jellyfin:
+      image: jellyfin/jellyfin
+      container_name: jellyfin
+      env_file:
+        - ./.env
+      volumes:
+        - ${DOCKERDIR}/appdata/jellyfin:/config
+        - ${DATADIR}/downloads:/downloads
+        - type: bind
+          source: ${DATADIR}
+          target: /media
+          read_only: true
+      ports:
+        - "8096:8096"  # Optional, if you rely on Traefik for routing, this can be removed.
+      restart: 'unless-stopped'
+      devices:
+        - /dev/dri/renderD128:/dev/dri/renderD128  # VA-API device for hardware acceleration
+      group_add:
+        - video  # Add the container to the video group necessary for accesing /dev/dri
+      environment:
+        - PUID=${PUID}
+        - PGID=${PGID}
+        - TZ=${TZ}
+        - UMASK_SET=002
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.jellyfin-rtr.rule=Host(`jellyfin.${DOMAINNAME}`)"
+        - "traefik.http.routers.jellyfin-rtr.entrypoints=websecure"
+        - "traefik.http.routers.jellyfin-rtr.service=jellyfin-svc"
+        - "traefik.http.services.jellyfin-svc.loadbalancer.server.port=8096"
+        - "traefik.http.routers.traefik-rtr.middlewares=middlewares-rate-limit@file,middlewares-secure-headers@file"
+      networks:
+        - t3_proxy
+
+  networks:
+    t3_proxy:
+      external: true

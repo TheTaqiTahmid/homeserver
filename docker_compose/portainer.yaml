@@ -1,0 +1,35 @@
+version: "3"
+services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    ports:
+      - 9000:9000
+    volumes:
+      - /home/taqi/docker/portainer/data:/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    networks:
+      - t3_proxy
+    labels:
+      - "traefik.enable=true"
+      # HTTP Routers
+      - "traefik.http.routers.portainer-rtr.entrypoints=websecure"
+      - "traefik.http.routers.portainer-rtr.rule=Host(`portainer.${DOMAINNAME}`)"
+      # HTTP Services
+      - "traefik.http.routers.portainer-rtr.tls=true"
+      - "traefik.http.routers.portainer-rtr.service=portainer-svc"
+      - "traefik.http.services.portainer-svc.loadbalancer.server.port=9000"
+      - "traefik.http.routers.traefik-rtr.middlewares=middlewares-rate-limit@file,middlewares-secure-headers@file"
+    command: 
+      --http-enabled
+    environment:
+      - TZ=${TZ}
+      - DOMAINNAME=${DOMAINNAME}
+volumes:
+  data:
+
+networks:
+  t3_proxy:
+    external: true

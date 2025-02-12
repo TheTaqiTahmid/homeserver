@@ -1,0 +1,11 @@
+# Proxmox access related variables
+proxmox_api_url: "192.168.1.121"
+
+# Cloud-init image related variables
+image_url: "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img"
+image_dest: "/tmp/cloud-image.img"
+image_format: "qcow2"
+storage_name: "local"
+
+# ansible venv
+ansible_venv: "/home/taqi/.venv/ansible/bin/python"

@@ -1,0 +1,31 @@
+image:
+  registry: docker.io
+  repository: bitnami/postgresql
+  tag: "16.2.0-debian-11-r0"
+global:
+  postgresql:
+    auth:
+      postgresPassword: "placeholder"
+      username: "placeholder"
+      password: "placeholder"
+      database: "postgres"
+
+primary:
+  persistence:
+    enabled: true
+    size: 5Gi
+  service:
+    type: LoadBalancer
+    ports:
+      postgresql: 5432
+
+readReplicas:
+  replicaCount: 1  # This plus primary makes 2 total
+  persistence:
+    enabled: true
+    size: 5Gi
+
+architecture: replication
+
+volumePermissions:
+  enabled: true

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: pocketbase
+description: A Helm chart for deploying PocketBase
+version: 0.1.0
+appVersion: "latest"
