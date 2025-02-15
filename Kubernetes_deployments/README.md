@@ -26,10 +26,10 @@ All cert-manager certificates require a referenced issuer that is in a ready
 condition to attempt to honor the request.
 [Ref](https://cert-manager.io/docs/concepts/issuer/).
 
-The template for ClusterIssuer is in the cert-manager directory. A single wildcard-cert
-will be created and used for all ingress subdomains.
-Create a new certificate and cert in cert directory
-and copy the secret manually to all the namespaces.
+The template for ClusterIssuer is in the cert-manager directory. A single
+wildcard-cert will be created and used for all ingress subdomains. Create a new
+certificate and cert in cert directory and copy the secret manually to all the
+namespaces.
 
 First add the DNS servers to the coreDNS config:
 
@@ -137,7 +137,8 @@ source .env
 kubectl create namespace external-services
 kubectl get secret wildcard-cert-secret --namespace=cert -o yaml \
   | sed 's/namespace: cert/namespace: external-services/' | kubectl apply -f -
-envsubst < external-service/proxmox.yaml | kubectl apply -n external-services -f -
+envsubst < external-service/proxmox.yaml | \
+  kubectl apply -n external-services -f -
 ```
 
 
@@ -225,6 +226,17 @@ cp -r /mnt/source/* /mnt/destination/
 
 # Create Storage Solution
 
+Longhorn is a distributed block storage solution for Kubernetes that is built
+using containers. It provides a simple and efficient way to manage persistent
+volumes. Longhorn is deployed in the k3s cluster to provide storage for the
+containers. For security reasons, the longhorn UI is not exposed outside the
+network. It is accessible locally via port-forwarding or loadbalancer.
+
+In order to use Longhorn, the storage disk must be formatted and mounted on
+each VM. The following commands format the disk and mount it on /mnt/longhorn
+directory. For deployment, the longhorn helm chart is used to install longhorn
+in the longhorn-system namespace.
+
 ```bash
 # On each VM
 sudo mkfs.ext4 /dev/sda4
@@ -238,10 +250,16 @@ kubectl create namespace longhorn-system
 helm install longhorn longhorn/longhorn --namespace longhorn-system
 
 kubectl -n longhorn-system get pods
+
 # Access longhorn UI
 kubectl -n longhorn-system port-forward svc/longhorn-frontend 8080:80
+# Or make it permanent by setting the longhorn-frontend service type to
+# LoadBalancer.
+kubectl -n longhorn-system edit svc longhorn-frontend
+```
 
-# If the /mnt/longhorn is not shown
+## If the /mnt/longhorn is not shown
+
 kubectl -n longhorn-system get nodes.longhorn.io
 kubectl -n longhorn-system edit nodes.longhorn.io <node-name>
 ```
@@ -256,7 +274,14 @@ Add the following block under disks for all nodes:
       path: /mnt/longhorn                # Specify the new mount path
       storageReserved: 0                 # Adjust storageReserved if needed
       tags: []
+```
 
+## Setting the number of replicas
+
+To set the number of replicas, edit the longhorn-storageclass configmap and
+set the numberOfReplicas to the desired number.
+
+```bash
 # Set number of replica count to 1
 kubectl edit configmap -n longhorn-system longhorn-storageclass
   set the numberOfReplicas: "1"
@@ -331,12 +356,13 @@ helm install qbittorrent qbittorrent-helm-chart/ --atomic
 ```
 
 After deployment, verify qBittorrent is accessible on the loadbalancer IP and
-port. Login to the qBittorrent UI with default credentials from the deployment log.
-Change the user settings under settings/WebUI.
-Configure the network interface (wg0) in settings/Advanced and
-set download/upload speeds in settings/speed.
+port. Login to the qBittorrent UI with default credentials from the deployment
+log. Change the user settings under settings/WebUI. Configure the network
+interface (wg0) in settings/Advanced and set download/upload speeds in
+settings/speed.
 
-Also verify the VPM is working by executing the following command on the qBittorrent pod:
+Also verify the VPM is working by executing the following command on the
+qBittorrent pod:
 
 ```bash
 curl ipinfo.io
@@ -375,7 +401,8 @@ psql -U $POSTGRES_USER -d postgres --host 192.168.1.145 -p 5432
 ```bash
 # To backup
 # Dump format is compressed and allows parallel restore
-pg_dump -U $POSTGRES_USER -h 192.168.1.145 -p 5432 -F c -f db_backup.dump postgres
+pg_dump -U $POSTGRES_USER -h 192.168.1.145 -p 5432 -F c \
+  -f db_backup.dump postgres
 
 # To restore
 pg_restore -U $POSTGRES_USER -h 192.168.1.145 -p 5432 -d postgres db_backup.dump
