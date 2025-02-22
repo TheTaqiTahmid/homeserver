@@ -418,3 +418,33 @@ substituted from the .env file.
 source .env
 envsubst < postgres/pgadmin.yaml | kubectl apply -n postgres -f -
 ```
+
+## Authentication Middleware Configuration for Traefik Ingress Controller
+
+The Traefik Ingress Controller provides robust authentication capabilities
+through middleware implementation. This functionality enables HTTP Basic
+Authentication for services that do not include native user authentication
+mechanisms.
+
+To implement authentication, a Traefik middleware must be configured within
+the target namespace. The process requires creating a secret file containing
+authentication credentials (username and password). These credentials must
+be base64 encoded before being integrated into the secret manifest file.
+
+Execute the following commands to configure the authentication:
+
+```bash
+htpasswd -c traefik_auth username
+
+echo traefik_auth | base64
+
+source .env
+envsubst < traefik-middleware/auth_secret.yaml | kubectl apply -n my-portfolio -f -
+kubernetes apply -f traefik-middleware/auth.yaml -n my-portfolio
+```
+
+Following middleware deployment, the authentication must be enabled by adding the appropriate annotation to the service's Ingress object specification:
+
+```
+traefik.ingress.kubernetes.io/router.middlewares: my-portfolio-basic-auth@kubernetescrd
+```
