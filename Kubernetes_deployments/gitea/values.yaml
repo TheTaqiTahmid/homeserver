@@ -1,0 +1,59 @@
+gitea:
+  config:
+    database:
+      DB_TYPE: postgres
+      HOST: postgres
+      NAME: giteadb
+      USER: gitea
+      PASSWD: password
+  additionalConfigSources:
+    - configMap:
+        name: gitea-app-ini-plaintext
+  admin:
+    username: admin
+    password: password
+    email: email
+
+postgresql:
+  enabled: false
+
+postgresql-ha:
+  enabled: false
+
+redis-cluster:
+  enabled: false
+
+redis:
+  enabled: false
+
+persistence:
+  enabled: true
+  accessModes: [ "ReadWriteMany" ]
+  size: "10Gi"
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 512Mi
+
+ingress:
+  enabled: true
+  hosts:
+    - host: git.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: wildcard-cert-secret
+      hosts:
+        - "*.example.com"
+
+actions:
+  enabled: true
+  runner:
+    replicas: 3
+  provisioning:
+    enabled: true

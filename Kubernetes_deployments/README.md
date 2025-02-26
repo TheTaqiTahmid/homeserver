@@ -419,6 +419,66 @@ source .env
 envsubst < postgres/pgadmin.yaml | kubectl apply -n postgres -f -
 ```
 
+## Gitea Git Server
+
+Reference:
+https://gitea.com/gitea/helm-chart/
+https://docs.gitea.com/installation/database-prep
+
+Gitea is a self-hosted Git service that is deployed in the k3s cluster. The
+Gitea deployment uses existing posrgres database for data storage. The Gitea
+service is exposed via ingress and is accessible from the internet.
+
+Configure a new user, database, and schema for Gitea in the postgres database.
+
+```bash
+CREATE ROLE gitea WITH LOGIN PASSWORD 'gitea';
+
+CREATE DATABASE giteadb
+WITH OWNER gitea
+TEMPLATE template0
+ENCODING UTF8
+LC_COLLATE 'en_US.UTF-8'
+LC_CTYPE 'en_US.UTF-8';
+
+\c giteadb
+CREATE SCHEMA gitea;
+GRANT USAGE ON SCHEMA gitea TO gitea;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA gitea TO gitea;
+ALTER SCHEMA gitea OWNER TO gitea;
+```
+
+Next, deploy the Gitea helm chart with the following values:
+
+```bash
+source .env
+kubectl create namespace gitea
+kubectl get secret wildcard-cert-secret --namespace=cert-manager -o yaml \
+  | sed 's/namespace: cert-manager/namespace: gitea/' | kubectl apply -f -
+
+# The configMap contains the app.ini file values for gitea
+kubectl apply -f gitea/configMap.yaml -n gitea
+
+helm install gitea gitea-charts/gitea -f gitea/values.yaml \
+  --namespace gitea \
+  --atomic \
+  --set ingress.hosts[0].host=$GITEA_HOST \
+  --set ingress.tls[0].hosts[0]=$DNSNAME  \
+  --set gitea.admin.username=$GITEA_USER \
+  --set gitea.admin.password=$GITEA_PASSWORD \
+  --set gitea.admin.email=$GITEA_EMAIL \
+  --set gitea.config.database.PASSWD=$POSTGRES_PASSWORD \
+  --set gitea.config.database.HOST=$POSTGRES_URL
+```
+
+To scale the gitea Runner replicas, edit the `gitea-act-runner` statefulset
+and set the replicas to the desired number.
+
+```bash
+kubectl edit statefulset gitea-act-runner -n gitea
+```
+
+
 ## Authentication Middleware Configuration for Traefik Ingress Controller
 
 The Traefik Ingress Controller provides robust authentication capabilities
