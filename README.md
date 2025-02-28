@@ -32,7 +32,7 @@
 - 🌐 Portfolio Website
 - 🗄️ PostgreSQL Database
 - 📦 Pocketbase Backend
-- 💻 Gitea Git Server
+- 🍵 Gitea Git Server
 
 ### 📋 Coming Soon
 - Nextcloud
