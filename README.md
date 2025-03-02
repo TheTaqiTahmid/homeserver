@@ -32,11 +32,11 @@
 - 🌐 Portfolio Website
 - 🗄️ PostgreSQL Database
 - 📦 Pocketbase Backend
-- 🍵 Gitea Git Server
+- 🍵 Gitea Git Server and Actions for CI/CD
 
 ### 📋 Coming Soon
 - Nextcloud
-- Monitoring Stack
+- Monitoring Stack with Prometheus and Grafana
 
 ## 💻 Hardware Setup
 
