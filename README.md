@@ -40,7 +40,7 @@
 
 ## 💻 Hardware Setup
 
-- 2x Mini PCs with Intel N1000 CPUs
+- 2x Mini PCs with Intel N100 CPUs
 - 16GB RAM each
 - 500GB SSDs
 - 1Gbps networking
