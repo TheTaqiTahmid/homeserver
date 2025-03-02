@@ -74,7 +74,7 @@ kind: Service
 metadata:
   name: pgadmin-service
 spec:
-  type: LoadBalancer  # or NodePort based on your setup
+  type: ClusterIP
   ports:
     - port: 80
       targetPort: 80
