@@ -61,11 +61,14 @@ Here are some troubleshoot commands to test:
 ```bash
 kubectl get clusterissuer
 kubectl describe clusterissuer
-kubectl get certificate -n nginx-test
-kubectl get certificateRequest -n nginx-test
+kubectl get certificate -n cert-manager
+kubectl get certificateRequest -n cert-manager
 kubectl describe challenges -n cert-manager
 kubectl describe orders -n cert-manager
 ```
+Alternatively, it is possible to generate service specific certs
+in desired namespaces by deploying the Certificate resource in the namespace.
+
 
 # Deploy Private Docker Registry
 
