@@ -1,6 +1,6 @@
 # Ansible Playbook for Proxmox VM Management
 
-This Ansible playbook automates the creation, deletion, and configuration of 
+This Ansible playbook automates the creation, deletion, and configuration of
 virtual machines (VMs) on a Proxmox server.
 
 ## Prerequisites
@@ -30,8 +30,32 @@ virtual machines (VMs) on a Proxmox server.
     multiple groups depending on the types of hosts.
 
 3. Add group-related variables to the group file under the `group_vars` directory
-   and individual host-related variables to the files under the `host_vars` 
+   and individual host-related variables to the files under the `host_vars`
   directory. Ansible will automatically pick up these variables.
+
+4. Add the following secrets to the ansible-vault:
+   - proxmox_api_token_id
+   - proxmox_api_token
+   - ansible_proxmox_user
+   - ansible_vm_user
+   - proxmox_user
+   - ansible_ssh_private_key_file
+   - ciuser
+   - cipassword
+
+  One can create the secret file using the following command:
+  ```sh
+  ansible-vault create secrets/vault.yml
+  ```
+
+  To encrypt and decrypt the file, use the following commands:
+  ```sh
+  ansible-vault encrypt secrets/vault.yml
+  ansible-vault decrypt secrets/vault.yml
+  ```
+  The password for vault file can be stored in a file or can be provided during
+  the encryption/decryption process. The password file location can be specified
+  in the `ansible.cfg` file.
 
 ## Playbooks
 
@@ -72,7 +96,7 @@ ansible-playbook playbooks/configure-vms.yaml --limit vm6
 
 ## Variables
 
-The playbooks use the following variables, which can be customized in the 
+The playbooks use the following variables, which can be customized in the
 `group_vars/proxmox.yml` file:
 
 - `vm_id`: The ID of the VM
