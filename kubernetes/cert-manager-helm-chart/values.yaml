@@ -18,4 +18,4 @@ wildcardCert:
 secret:
   type: Opaque
   name: cloudflare-api-token-secret
-  apiToken: base64encodedtoken
+  apiToken: cloudflareToken

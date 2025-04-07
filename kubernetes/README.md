@@ -108,8 +108,8 @@ wildcard CA cert and deploy the portfolio webapp.
 
 ```bash
 kubectl create namespace my-portfolio
-kubectl get secret wildcard-cert-secret --namespace=cert -o yaml \
-  | sed 's/namespace: cert/namespace: my-portfolio/' | kubectl apply -f -
+kubectl get secret wildcard-cert-secret --namespace=cert-manager -o yaml \
+  | sed 's/namespace: cert-manager/namespace: my-portfolio/' | kubectl apply -f -
 
 source .env
 kubectl create secret docker-registry my-registry-secret \
