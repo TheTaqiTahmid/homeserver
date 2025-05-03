@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.service.webui.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: lldap
+spec:
+  type: {{ .Values.service.webui.type }}
+  ports:
+    - name: {{ .Values.service.webui.ports.name | quote }}
+      port: {{ .Values.service.webui.ports.port }}
+      targetPort: {{ .Values.service.webui.ports.targetPort }}
+  selector:
+    app: lldap
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.service.ldap.name }}
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: lldap.tahmidcloud.com
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: lldap
+spec:
+  type: {{ .Values.service.ldap.type }}
+  ports:
+    - name: {{ .Values.service.ldap.ports.name | quote }}
+      port: {{ .Values.service.ldap.ports.port }}
+      targetPort: {{ .Values.service.ldap.ports.targetPort }}
+  selector:
+    app: lldap

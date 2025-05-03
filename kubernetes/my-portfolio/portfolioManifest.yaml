@@ -64,20 +64,20 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: react-app-service
+            name: portfolio-app-svc
             port:
               number: 80
       - path: /interest
         pathType: Prefix
         backend:
           service:
-            name: react-app-service
+            name: portfolio-app-svc
             port:
               number: 80
       - path: /project
         pathType: Prefix
         backend:
           service:
-            name: react-app-service
+            name: portfolio-app-svc
             port:
               number: 80

@@ -1,5 +1,16 @@
-Setup K3s Kubernetes Cluster
-===================================
+# Setup K3s Kubernetes Cluster
+
+# Configure Traefik with extra values
+
+The Traefik ingress controller is deployed along with K3s. To modify the
+default values,
+
+```bash
+# k3s still uses traefik V2
+helm upgrade traefik traefik/traefik \
+  -n kube-system -f traefik/traefik-values.yaml \
+  --version 22.1.0
+```
 
 # Configure Cert Manager for automating SSL certificate handling
 
@@ -38,6 +49,7 @@ export KUBE_EDITOR=nvim
 # Change the forward section with . 1.1.1.1 1.0.0.1
 kubectl -n kube-system edit configmap coredns
 ```
+
 Next, deploy the ClusterIssuer, WildcardCert, and secrets using helm
 
 ```bash
@@ -66,9 +78,9 @@ kubectl get certificateRequest -n cert-manager
 kubectl describe challenges -n cert-manager
 kubectl describe orders -n cert-manager
 ```
+
 Alternatively, it is possible to generate service specific certs
 in desired namespaces by deploying the Certificate resource in the namespace.
-
 
 # Deploy Private Docker Registry
 
@@ -100,7 +112,6 @@ helm install registry docker-registry-helm-chart/ \
   --atomic
 ```
 
-
 # Deploy Portfolio Website from Private Docker Registry
 
 First, create a secret to access the private docker registry. Then copy the
@@ -123,7 +134,6 @@ envsubst < my-portfolio/portfolioManifest.yaml | \
   kubectl apply -n my-portfolio -f -
 ```
 
-
 # Expose External Services via Traefik Ingress Controller
 
 External services hosted outside the kubernetes cluster can be exposed using
@@ -144,14 +154,13 @@ envsubst < external-service/proxmox.yaml | \
   kubectl apply -n external-services -f -
 ```
 
-
 # Create Shared NFS Storage for Plex and Jellyfin
 
 A 1TB NVME SSD is mounted to one of the original homelab VMs. This serves as an
 NFS mount for all k3s nodes to use as shared storage for plex and jellyfin
 containers.
 
-##  On the host VM:
+## On the host VM:
 
 ```bash
 sudo apt update
@@ -176,7 +185,8 @@ sudo systemctl start nfs-kernel-server
 sudo systemctl enable nfs-kernel-server
 ```
 
-##  On all the K3s VMs:
+## On all the K3s VMs:
+
 ```
 sudo apt install nfs-common
 sudo mkdir /mnt/media
@@ -186,7 +196,6 @@ sudo mount 192.168.1.113:/media/flexdrive /mnt/media
 # by k8s
 sudo umount /mnt/media
 ```
-
 
 # Deploy Jellyfin Container in K3s
 
@@ -226,7 +235,6 @@ kubectl exec -it temp-pod -n media -- bash
 cp -r /mnt/source/* /mnt/destination/
 ```
 
-
 # Create Storage Solution
 
 Longhorn is a distributed block storage solution for Kubernetes that is built
@@ -265,7 +273,8 @@ kubectl -n longhorn-system edit svc longhorn-frontend
 
 kubectl -n longhorn-system get nodes.longhorn.io
 kubectl -n longhorn-system edit nodes.longhorn.io <node-name>
-```
+
+````
 Add the following block under disks for all nodes:
 
 ```bash
@@ -277,7 +286,7 @@ Add the following block under disks for all nodes:
       path: /mnt/longhorn                # Specify the new mount path
       storageReserved: 0                 # Adjust storageReserved if needed
       tags: []
-```
+````
 
 ## Setting the number of replicas
 
@@ -289,7 +298,6 @@ set the numberOfReplicas to the desired number.
 kubectl edit configmap -n longhorn-system longhorn-storageclass
   set the numberOfReplicas: "1"
 ```
-
 
 # Configure AdGuard Adblocker
 
@@ -311,7 +319,6 @@ helm install adguard \
   --set host=$ADGUARD_HOST \
   --atomic adguard-helm-chart
 ```
-
 
 # Pocketbase Database and Authentication Backend
 
@@ -370,7 +377,6 @@ qBittorrent pod:
 ```bash
 curl ipinfo.io
 ```
-
 
 # PostgreSQL Database
 
@@ -481,7 +487,6 @@ and set the replicas to the desired number.
 kubectl edit statefulset gitea-act-runner -n gitea
 ```
 
-
 ## Authentication Middleware Configuration for Traefik Ingress Controller
 
 The Traefik Ingress Controller provides robust authentication capabilities
@@ -510,4 +515,30 @@ Following middleware deployment, the authentication must be enabled by adding th
 
 ```
 traefik.ingress.kubernetes.io/router.middlewares: my-portfolio-basic-auth@kubernetescrd
+```
+
+# LLDAP Authentication Server
+
+LDAP is a protocol used to access and maintain distributed directory information.
+To provide central authentication for all services, an LDAP server is deployed in the
+k3s cluster. LLDAP is a lightweight LDAP server that is easy to deploy and manage.
+The LLDAP server is deployed using the helm chart and is accessible via the ingress
+controller.
+
+```bash
+source .env
+
+kubectl create namespace ldap
+kubectl get secret wildcard-cert-secret --namespace=cert-manager -o yaml \
+  | sed 's/namespace: cert-manager/namespace: ldap/' | kubectl apply -f -
+
+helm install ldap \
+  lldap-helm-chart/ \
+  --set ingress.hosts.host=$LDAP_HOST \
+  --set ingress.tls[0].hosts[0]=$DNSNAME \
+  --set secret.lldapUserName=$LLDAP_ADMIN_USER \
+  --set secret.lldapJwtSecret=$LLDAP_JWT_SECRET \
+  --set secret.lldapUserPass=$LLDAP_ADMIN_PASSWORD \
+  --atomic \
+  -n ldap
 ```
