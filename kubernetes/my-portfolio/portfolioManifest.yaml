@@ -15,13 +15,13 @@ spec:
         app: portfolio-app
     spec:
       imagePullSecrets:
-      - name: my-registry-secret
+        - name: my-registry-secret
       containers:
-      - name: portfolio-app
-        image: "${DOCKER_REGISTRY_HOST}/my-portfolio-app:latest"
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 80
+        - name: portfolio-app
+          image: "${DOCKER_REGISTRY_HOST}/my-portfolio-app:latest"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
 ---
@@ -32,8 +32,8 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 80
-    targetPort: 80
+    - port: 80
+      targetPort: 80
   selector:
     app: portfolio-app
 
@@ -46,38 +46,17 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
 spec:
   tls:
-  - hosts:
-      - "${DNSNAME}"
-    secretName: wildcard-cert-secret
+    - hosts:
+        - "${DNSNAME}"
+      secretName: wildcard-cert-secret
   rules:
-  - host: "${PORTFOLIO_HOST}"
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: portfolio-app-svc
-            port:
-              number: 80
-      - path: /experience
-        pathType: Prefix
-        backend:
-          service:
-            name: portfolio-app-svc
-            port:
-              number: 80
-      - path: /interest
-        pathType: Prefix
-        backend:
-          service:
-            name: portfolio-app-svc
-            port:
-              number: 80
-      - path: /project
-        pathType: Prefix
-        backend:
-          service:
-            name: portfolio-app-svc
-            port:
-              number: 80
+    - host: "${PORTFOLIO_HOST}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: portfolio-app-svc
+                port:
+                  number: 80

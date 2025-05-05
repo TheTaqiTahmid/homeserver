@@ -35,6 +35,7 @@
 - 🍵 Gitea Git Server and Actions for CI/CD
 
 ### 📋 Coming Soon
+
 - Nextcloud
 - Monitoring Stack with Prometheus and Grafana
 
@@ -51,14 +52,16 @@
 ### 1. Setting up Proxmox Infrastructure
 
 #### Proxmox Base Installation
+
 - Boot mini PCs from Proxmox USB drive
 - Install on SSD and configure networking
 - Set up cluster configuration
-> 📚 Reference: [Official Proxmox Installation Guide](https://pve.proxmox.com/wiki/Installation)
+  > 📚 Reference: [Official Proxmox Installation Guide](https://pve.proxmox.com/wiki/Installation)
 
 #### 3. Cloud Image Implementation
 
 Cloud images provide:
+
 - 🚀 Pre-configured, optimized disk images
 - 📦 Minimal software footprint
 - ⚡ Quick VM deployment
@@ -70,6 +73,7 @@ your homelab environment.
 #### Proxmox VM Disk Management
 
 **Expanding VM Disk Size:**
+
 1. Access Proxmox web interface
 2. Select target VM
 3. Navigate to Hardware tab
@@ -77,6 +81,7 @@ your homelab environment.
 5. Click Resize and enter new size (e.g., 50G)
 
 **Post-resize VM Configuration:**
+
 ```bash
 # Access VM and configure partitions
 sudo fdisk /dev/sda
@@ -89,7 +94,9 @@ sudo mkfs.ext4 /dev/sdaX
 ```
 
 #### Physical Disk Passthrough
+
 Pass physical disks (e.g., NVME storage) to VMs:
+
 ```bash
 # List disk IDs
 lsblk |awk 'NR==1{print $0" DEVICE-ID(S)"}NR>1{dev=$1;printf $0" ";system("find /dev/disk/by-id -lname \"*"dev"\" -printf \" %p\"");print "";}'|grep -v -E 'part|lvm'
@@ -100,19 +107,23 @@ qm set 103 -scsi2 /dev/disk/by-id/usb-WD_BLACK_SN770_1TB_012938055C4B-0:0
 # Verify configuration
 grep 5C4B /etc/pve/qemu-server/103.conf
 ```
-> 📚 Reference: [Proxmox Disk Passthrough Guide](https://pve.proxmox.com/wiki/Passthrough_Physical_Disk_to_Virtual_Machine_(VM))
+
+> 📚 Reference: [Proxmox Disk Passthrough Guide](<https://pve.proxmox.com/wiki/Passthrough_Physical_Disk_to_Virtual_Machine_(VM)>)
 
 ### 2. Kubernetes Cluster Setup
 
 #### K3s Cluster Configuration
+
 Setting up a 4-node cluster (2 master + 2 worker):
 
 **Master Node 1:**
+
 ```bash
 curl -sfL https://get.k3s.io | sh -s - server --cluster-init --disable servicelb
 ```
 
 **Master Node 2:**
+
 ```bash
 export TOKEN=<token>
 export MASTER1_IP=<ip>
@@ -120,6 +131,7 @@ curl -sfL https://get.k3s.io | sh -s - server --server https://${MASTER1_IP}:644
 ```
 
 **Worker Nodes:**
+
 ```bash
 export TOKEN=<token>
 export MASTER1_IP=<ip>
@@ -127,6 +139,7 @@ curl -sfL https://get.k3s.io | K3S_URL=https://${MASTER1_IP}:6443 K3S_TOKEN=${TO
 ```
 
 #### MetalLB Load Balancer Setup
+
 ```bash
 # Install MetalLB
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.7/config/manifests/metallb-native.yaml
@@ -139,6 +152,7 @@ kubectl apply -f /home/taqi/homeserver/k3s-infra/metallb/metallbConfig.yaml
 ```
 
 **Quick Test:**
+
 ```bash
 # Deploy test nginx
 kubectl create namespace nginx
@@ -156,3 +170,60 @@ Contributions welcome! Feel free to open issues or submit PRs.
 ## 📝 License
 
 MIT License - feel free to use this as a template for your own homelab!
+
+# Upgrade K3s cluster
+
+Ref: https://github.com/k3s-io/k3s-upgrade
+
+## Deploying the K3s Upgrade Controller
+
+First deploy the k3s upgrade controller
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/rancher/system-upgrade-controller/master/manifests/system-upgrade-controller.yaml
+```
+
+Check that the controller is running. If not, check if the serviceaccount is
+bound to the correct role.
+
+```bash
+kubectl get pods -n kube-system
+kubectl create clusterrolebinding system-upgrade \
+    --clusterrole=cluster-admin \
+    --serviceaccount=system-upgrade:system-upgrade
+```
+
+## Create the upgrade plan
+
+First label the selected node with `k3s-upgrade=true` label. This is
+needed to select the node for upgrade.
+
+```bash
+kubectl label node <node-name> k3s-upgrade=true
+```
+
+It is best practice to upgrade node one by one. Thus, the cluster will
+still be operational during the upgrade. And, for any issues, it is possible
+to rollback the upgrade.
+
+## Create the upgrade plan
+
+Then create the upgrade plan. The plan will be created in the `system-upgrade`
+namespace. You can change the namespace by using the `--namespace` flag.
+
+```bash
+kubectl apply -f /home/taqi/homeserver/kubernetes/k3s-upgrade/plan.yaml
+```
+
+The plan will fitst try to cordon and drain the node. If it fails, check
+the logs of the plan.
+
+The longhorn CSI pods might node be drained. In that case, you can
+cordon the node and drain it manually.
+Ref: https://github.com/longhorn/longhorn/discussions/4102
+
+```bash
+kubectl drain vm4 --ignore-daemonsets \
+    --delete-emptydir-data \
+    --pod-selector='app!=csi-attacher,app!=csi-provisioner'
+```

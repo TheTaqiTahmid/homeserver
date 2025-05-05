@@ -15,8 +15,8 @@ gitea:
     email: email
 
 image:
-  repository: gitea/gitea
-  tag: 1.23.4
+  repository: gitea
+  tag: 1.23.7
 
 postgresql:
   enabled: false
@@ -32,7 +32,7 @@ redis:
 
 persistence:
   enabled: true
-  accessModes: [ "ReadWriteMany" ]
+  accessModes: ["ReadWriteMany"]
   size: "10Gi"
 
 resources:

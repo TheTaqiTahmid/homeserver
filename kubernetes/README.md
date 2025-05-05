@@ -408,7 +408,7 @@ psql -U $POSTGRES_USER -d postgres --host 192.168.1.145 -p 5432
 ## Backup and Restore PostgreSQL Database
 
 ```bash
-# To backup
+# To backup§
 # Dump format is compressed and allows parallel restore
 pg_dump -U $POSTGRES_USER -h 192.168.1.145 -p 5432 -F c \
   -f db_backup.dump postgres
@@ -466,7 +466,7 @@ kubectl get secret wildcard-cert-secret --namespace=cert-manager -o yaml \
   | sed 's/namespace: cert-manager/namespace: gitea/' | kubectl apply -f -
 
 # The configMap contains the app.ini file values for gitea
-kubectl apply -f gitea/configMap.yaml -n gitea
+envsubst < gitea/configMap.yaml | kubectl apply -n gitea -f -
 
 helm install gitea gitea-charts/gitea -f gitea/values.yaml \
   --namespace gitea \
@@ -511,7 +511,8 @@ envsubst < traefik-middleware/auth_secret.yaml | kubectl apply -n my-portfolio -
 kubernetes apply -f traefik-middleware/auth.yaml -n my-portfolio
 ```
 
-Following middleware deployment, the authentication must be enabled by adding the appropriate annotation to the service's Ingress object specification:
+Following middleware deployment, the authentication must be enabled by adding
+the appropriate annotation to the service's Ingress object specification:
 
 ```
 traefik.ingress.kubernetes.io/router.middlewares: my-portfolio-basic-auth@kubernetescrd
