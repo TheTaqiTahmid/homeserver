@@ -221,6 +221,34 @@ kubectl apply -f media/pvc.yaml -n media
 envsubst < media/jellyfin-deploy.yaml | kubectl apply -n media -f -
 ```
 
+## Enable LDAP Authentication
+
+In order to enable LDAP authentication for Jellyfin, the LDAP
+plugin must be installed. The LDAP plugin is not included in the
+Jellyfin helm chart. The plugin must be installed manually by
+from the GUI.
+
+1. Go to the Jellyfin web UI and login as admin.
+2. Go to the Plugins section and click on the "Catalog" tab.
+3. Search for the "LDAP" plugin and click on the "Install" button.
+4. After the plugin is installed, go to the "Dashboard" section and click on
+   the "LDAP" tab.
+5. Configure the LDAP settings as follows:
+    - LDAP Server:
+      - Host: 192.168.1.144
+      - Port: 3890
+      - LDAP Bind User: UID=admin,OU=people,DC=homelab,DC=local
+      - Bind Password:
+      - LDAP Base DN for searches: DC=homelab,DC=local
+      - LDAP Search Filter: (memberOf=CN=jellyfin_users,OU=groups,DC=homelab,DC=local)
+      - LDAP Search Attribute: uid, cn, mail, displayName
+      - LDAP Uid Attribute: uid
+      - LDAP Username Attribute: CN
+      - LDAP Password Attribute: userPassword
+      - LDAP Admin Bind DN: dc=homelab,dc=local
+      - LDAP Admin Filter: (memberOf=CN=jellyfin_users,OU=groups,DC=homelab,DC=local)
+
+
 ## Transfer media files from one PVC to another (Optional)
 
 To transfer media files from one PVC to another, create a temporary pod to copy
@@ -428,7 +456,7 @@ source .env
 envsubst < postgres/pgadmin.yaml | kubectl apply -n postgres -f -
 ```
 
-## Gitea Git Server
+# Gitea Git Server
 
 Reference:
 https://gitea.com/gitea/helm-chart/
@@ -487,7 +515,30 @@ and set the replicas to the desired number.
 kubectl edit statefulset gitea-act-runner -n gitea
 ```
 
-## Authentication Middleware Configuration for Traefik Ingress Controller
+## Configure LDAP for Gitea
+
+Ref: https://github.com/lldap/lldap/blob/main/example_configs/gitea.md
+
+To configure LDAP authentication for Gitea, the LDAP server must be
+deployed in the k3s cluster.
+
+LDAP config is done via the Gitea GUI. Here is the LDAP configuration
+
+```text
+Host: 192.168.1.144
+Port: 3890
+Bind DN: uid=admin,ou=people,dc=homelab,dc=local
+Bind Password: <admin password>
+User Search Base: ou=people,dc=homelab,dc=local
+User Filter: (&(memberof=cn=gitea_user,ou=groups,dc=homelab,dc=local)(|(uid=%[1]s)(mail=%[1]s)))
+Admin Filter: (memberOf=CN=gitea_admin,OU=groups,DC=homelab,DC=local)
+User Name Attribute: uid
+First Name Attribute: givenName
+Last Name Attribute: sn
+Email Attribute: mail
+```
+
+# Authentication Middleware Configuration for Traefik Ingress Controller
 
 The Traefik Ingress Controller provides robust authentication capabilities
 through middleware implementation. This functionality enables HTTP Basic
