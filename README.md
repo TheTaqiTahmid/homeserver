@@ -163,19 +163,11 @@ kubectl expose deployment nginx --port=80 --type=LoadBalancer -n nginx
 kubectl delete namespace nginx
 ```
 
-## 🤝 Contributing
-
-Contributions welcome! Feel free to open issues or submit PRs.
-
-## 📝 License
-
-MIT License - feel free to use this as a template for your own homelab!
-
-# Upgrade K3s cluster
+## Upgrade K3s cluster
 
 Ref: https://github.com/k3s-io/k3s-upgrade
 
-## Deploying the K3s Upgrade Controller
+### Deploying the K3s Upgrade Controller
 
 First deploy the k3s upgrade controller
 
@@ -193,7 +185,7 @@ kubectl create clusterrolebinding system-upgrade \
     --serviceaccount=system-upgrade:system-upgrade
 ```
 
-## Create the upgrade plan
+### Label the nodes
 
 First label the selected node with `k3s-upgrade=true` label. This is
 needed to select the node for upgrade.
@@ -206,7 +198,7 @@ It is best practice to upgrade node one by one. Thus, the cluster will
 still be operational during the upgrade. And, for any issues, it is possible
 to rollback the upgrade.
 
-## Create the upgrade plan
+### Create the upgrade plan
 
 Then create the upgrade plan. The plan will be created in the `system-upgrade`
 namespace. You can change the namespace by using the `--namespace` flag.
@@ -227,3 +219,11 @@ kubectl drain vm4 --ignore-daemonsets \
     --delete-emptydir-data \
     --pod-selector='app!=csi-attacher,app!=csi-provisioner'
 ```
+
+## 🤝 Contributing
+
+Contributions welcome! Feel free to open issues or submit PRs.
+
+## 📝 License
+
+MIT License - feel free to use this as a template for your own homelab!

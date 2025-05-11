@@ -148,9 +148,9 @@ services running locally or remotely.
 ```bash
 source .env
 kubectl create namespace external-services
-kubectl get secret wildcard-cert-secret --namespace=cert -o yaml \
-  | sed 's/namespace: cert/namespace: external-services/' | kubectl apply -f -
-envsubst < external-service/proxmox.yaml | \
+kubectl get secret wildcard-cert-secret --namespace=cert-manager -o yaml \
+  | sed 's/namespace: cert-manager/namespace: external-services/' | kubectl apply -f -
+envsubst '${PROXMOX_IP} ${PROXMOX_HOST}' < external-service/proxmox.yaml | \
   kubectl apply -n external-services -f -
 ```
 
@@ -282,6 +282,13 @@ sudo mkfs.ext4 /dev/sda4
 sudo mkdir /mnt/longhorn
 sudo mount /dev/sda4 /mnt/longhorn
 
+# Add entry to /etc/fstab to persist across reboot
+echo "/dev/sda4 /mnt/longhorn ext4 defaults 0 2" | sudo tee -a /etc/fstab
+```
+Deploy the longhorn helm chart.
+Ref: https://github.com/longhorn/charts/tree/v1.8.x/charts/longhorn
+
+```bash
 helm repo add longhorn https://charts.longhorn.io
 helm repo update
 
@@ -298,6 +305,8 @@ kubectl -n longhorn-system edit svc longhorn-frontend
 ```
 
 ## If the /mnt/longhorn is not shown
+
+Ref: https://longhorn.io/docs/1.8.1/nodes-and-volumes/nodes/default-disk-and-node-config/
 
 kubectl -n longhorn-system get nodes.longhorn.io
 kubectl -n longhorn-system edit nodes.longhorn.io <node-name>
