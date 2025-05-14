@@ -114,19 +114,17 @@ helm install registry docker-registry-helm-chart/ \
 
 # Deploy Portfolio Website from Private Docker Registry
 
-First, create a secret to access the private docker registry. Then copy the
-wildcard CA cert and deploy the portfolio webapp.
+First, create the namespace and create a secret to access the private docker
+registry.
 
 ```bash
 kubectl create namespace my-portfolio
-kubectl get secret wildcard-cert-secret --namespace=cert-manager -o yaml \
-  | sed 's/namespace: cert-manager/namespace: my-portfolio/' | kubectl apply -f -
 
 source .env
 kubectl create secret docker-registry my-registry-secret \
-  --docker-server="${DOCKER_REGISTRY_HOST}" \
-  --docker-username="${DOCKER_USER}" \
-  --docker-password="${DOCKER_PASSWORD}" \
+  --docker-server="$DOCKER_REGISTRY_HOST" \
+  --docker-username="$DOCKER_USER" \
+  --docker-password="$DOCKER_PASSWORD" \
   -n my-portfolio
 
 # use envsubst to substitute the environment variables in the manifest
@@ -234,20 +232,19 @@ from the GUI.
 4. After the plugin is installed, go to the "Dashboard" section and click on
    the "LDAP" tab.
 5. Configure the LDAP settings as follows:
-    - LDAP Server:
-      - Host: 192.168.1.144
-      - Port: 3890
-      - LDAP Bind User: UID=admin,OU=people,DC=homelab,DC=local
-      - Bind Password:
-      - LDAP Base DN for searches: DC=homelab,DC=local
-      - LDAP Search Filter: (memberOf=CN=jellyfin_users,OU=groups,DC=homelab,DC=local)
-      - LDAP Search Attribute: uid, cn, mail, displayName
-      - LDAP Uid Attribute: uid
-      - LDAP Username Attribute: CN
-      - LDAP Password Attribute: userPassword
-      - LDAP Admin Bind DN: dc=homelab,dc=local
-      - LDAP Admin Filter: (memberOf=CN=jellyfin_users,OU=groups,DC=homelab,DC=local)
-
+   - LDAP Server:
+     - Host: 192.168.1.144
+     - Port: 3890
+     - LDAP Bind User: UID=admin,OU=people,DC=homelab,DC=local
+     - Bind Password:
+     - LDAP Base DN for searches: DC=homelab,DC=local
+     - LDAP Search Filter: (memberOf=CN=jellyfin_users,OU=groups,DC=homelab,DC=local)
+     - LDAP Search Attribute: uid, cn, mail, displayName
+     - LDAP Uid Attribute: uid
+     - LDAP Username Attribute: CN
+     - LDAP Password Attribute: userPassword
+     - LDAP Admin Bind DN: dc=homelab,dc=local
+     - LDAP Admin Filter: (memberOf=CN=jellyfin_users,OU=groups,DC=homelab,DC=local)
 
 ## Transfer media files from one PVC to another (Optional)
 
@@ -285,6 +282,7 @@ sudo mount /dev/sda4 /mnt/longhorn
 # Add entry to /etc/fstab to persist across reboot
 echo "/dev/sda4 /mnt/longhorn ext4 defaults 0 2" | sudo tee -a /etc/fstab
 ```
+
 Deploy the longhorn helm chart.
 Ref: https://github.com/longhorn/charts/tree/v1.8.x/charts/longhorn
 
@@ -568,7 +566,7 @@ echo traefik_auth | base64
 
 source .env
 envsubst < traefik-middleware/auth_secret.yaml | kubectl apply -n my-portfolio -f -
-kubernetes apply -f traefik-middleware/auth.yaml -n my-portfolio
+kubectl apply -f traefik-middleware/auth.yaml -n my-portfolio
 ```
 
 Following middleware deployment, the authentication must be enabled by adding
