@@ -146,8 +146,6 @@ services running locally or remotely.
 ```bash
 source .env
 kubectl create namespace external-services
-kubectl get secret wildcard-cert-secret --namespace=cert-manager -o yaml \
-  | sed 's/namespace: cert-manager/namespace: external-services/' | kubectl apply -f -
 envsubst '${PROXMOX_IP} ${PROXMOX_HOST}' < external-service/proxmox.yaml | \
   kubectl apply -n external-services -f -
 ```

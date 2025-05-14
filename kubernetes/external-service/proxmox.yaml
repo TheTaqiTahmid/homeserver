@@ -64,6 +64,8 @@ data:
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
   name: proxmox-route
   namespace: external-services
 spec:
@@ -76,4 +78,7 @@ spec:
         - name: proxmox-proxy
           port: 80
   tls:
-    secretName: wildcard-cert-secret
+    certResolver: cert-manager
+    secretName: proxmox-tls
+    domains:
+      - main: "${PROXMOX_HOST}"
