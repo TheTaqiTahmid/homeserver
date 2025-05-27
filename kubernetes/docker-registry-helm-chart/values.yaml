@@ -14,10 +14,11 @@ ingress:
   enabled: true
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    cert-manager.io/issuer: "letsencrypt-prod"
   tls:
     enabled: true
     host: "*.example.com"
-    secretName: wildcard-cert-secret
+    secretName: registry-tls
 
 service:
   type: ClusterIP

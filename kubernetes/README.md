@@ -102,13 +102,9 @@ Next, deploy the docker registry with helm chart:
 
 ```bash
 source .env
-kubectl get secret wildcard-cert-secret --namespace=cert-manager -o yaml \
-  | sed 's/namespace: cert-manager/namespace: docker-registry/' \
-  | kubectl apply -f -
-
 helm install registry docker-registry-helm-chart/ \
   --set host=$DOCKER_REGISTRY_HOST \
-  --set ingress.tls.host=$DNSNAME \
+  --set ingress.tls.host=$REGISTRY_HOST \
   --atomic
 ```
 
@@ -289,7 +285,9 @@ helm repo add longhorn https://charts.longhorn.io
 helm repo update
 
 kubectl create namespace longhorn-system
-helm install longhorn longhorn/longhorn --namespace longhorn-system
+helm install longhorn longhorn/longhorn \
+  --namespace longhorn-system  \
+  -f values.yaml
 
 kubectl -n longhorn-system get pods
 
@@ -330,6 +328,19 @@ set the numberOfReplicas to the desired number.
 # Set number of replica count to 1
 kubectl edit configmap -n longhorn-system longhorn-storageclass
   set the numberOfReplicas: "1"
+```
+
+## Multiple storage classes for different replica counts with Longhorn
+
+To create multiple storage classes with different replica counts, create
+multiple storage class yaml files with different replica counts and apply
+them. The storage class name must be different for each storage class.
+
+```bash
+# Create a new storage class with 2 replicas
+kubectl apply -n longhorn-system -f longhorn-storageclass-2-replica.yaml
+# Create a new storage class with 3 replicas
+kubectl apply -n longhorn-system -f longhorn-storageclass-3-replica.yaml
 ```
 
 # Configure AdGuard Adblocker
@@ -474,7 +485,7 @@ service is exposed via ingress and is accessible from the internet.
 Configure a new user, database, and schema for Gitea in the postgres database.
 
 ```bash
-CREATE ROLE gitea WITH LOGIN PASSWORD 'gitea';
+CREATE ROLE gitea WITH LOGIN PASSWORD 'dummypassword';
 
 CREATE DATABASE giteadb
 WITH OWNER gitea
@@ -598,4 +609,186 @@ helm install ldap \
   --set secret.lldapUserPass=$LLDAP_ADMIN_PASSWORD \
   --atomic \
   -n ldap
+```
+
+# Minio Object Storage
+
+MinIO is a High Performance Object Storage. It is compatible with Amazon S3.
+It is deployed in the k3s cluster using the helm chart.
+
+The minio deployment is divided into two parts: the MinIO operator and the
+MinIO tenant. The MinIO operator is responsible for managing the MinIO
+deployment and the MinIO tenant is responsible for managing the MinIO
+buckets and objects. The MinIO operator is deployed in the `minio-operator`
+namespace and the MinIO tenant is deployed in the `minio` namespace.
+
+## Deploy MinIO Operator
+
+For deploying the MinIO operator, the MinIO operator helm chart is used.
+The default values are sufficient for the operator deployment.
+
+```bash
+helm repo add minio https://operator.min.io/
+helm repo update
+helm install \
+  --namespace minio-operator \
+  --create-namespace \
+  minio-operator minio/operator
+```
+
+## Deploy MinIO Tenant
+
+The MinIO tenant is deployed in the `minio` namespace. The default values
+are overridden with local values-tenant.yaml file.
+
+```bash
+source .env
+kubectl create namespace minio
+helm upgrade --install minio-tenant \
+  minio/tenant \
+  --namespace minio \
+  -f minio/values-tenant.yaml \
+  --set tenant.configSecret.accessKey=$MINIO_ROOT_USER \
+  --set tenant.configSecret.secretKey=$MINIO_ROOT_PASSWORD \
+  --set ingress.console.host=$MINIO_HOST \
+  --set ingress.console.tls[0].hosts[0]=$MINIO_HOST \
+  --atomic
+```
+
+# Deploy Database with CloudNativePG operator
+
+Ref: https://cloudnative-pg.io/documentation/current/backup/#main-concepts
+CloudNativePG is a Kubernetes operator that manages PostgreSQL clusters.
+First, deploy the operator in the `cloudnative-pg` namespace.
+
+```bash
+helm repo add cnpg https://cloudnative-pg.github.io/charts
+helm upgrade --install cnpg \
+  --namespace cnpg-system \
+  --create-namespace \
+  cnpg/cloudnative-pg
+```
+
+Next, deploy the PostgreSQL cluster in the `postgres` namespace with backup
+configured towards the minio object storage.
+
+```bash
+source .env
+kubectl create namespace immich
+# First create the secret for minio access
+envsubst < cloud-native-pg/secrets.yaml | kubectl apply -n immich -f -
+
+# Then deploy the postgres cluster
+envsubst < cloud-native-pg/cloudnative-pg.yaml | kubectl apply -n immich -f -
+
+# Deploy the backup schedule
+kubectl apply -f cloud-native-pg/backup.yaml -n immich
+```
+
+## Recovery from Backup
+
+Ref: https://cloudnative-pg.io/documentation/1.20/recovery/
+To recover the PostgreSQL cluster from a backup using cloudnative-pg,
+there are two ways.
+
+1. Recovery from volume snapshot - requires cnpg plugin to take the snapshot
+   with kubectl.
+2. Recovery from backup stored in object storage - requires the backup to be
+   stored in the object storage.
+
+To recover from a backup stored in the object storage, apply the backup-recovery.yaml template with the desired values.
+
+```bash
+source .env
+envsubst < cloud-native-pg/backup-recovery.yaml | kubectl apply -n immich -f -
+```
+
+## Create a new PostgreSQL cluster from existing Database
+
+To create a new PostgreSQL cluster from an existing database, you can use the `create-cluster.yaml` template. This template allows you to create a new PostgreSQL cluster from an existing database by specifying the necessary configurations and parameters in the YAML file.
+
+# Immich Self-hosted Photo and Video Backup Solution
+
+Immich is a self-hosted photo and video backup solution that is deployed in
+the k3s cluster. The Immich deployment uses the existing postgres database
+for data storage. The Immich service is exposed via ingress and is accessible
+from the internet.
+
+To use the existing postgres database, first create a new user and database
+for Immich in the postgres database.
+
+```bash
+# Log into the postgres pod
+kubectl exec -it -n immich pg-backup-1 -- psql -U postgres
+
+
+# Then run the following commands in the psql shell
+CREATE ROLE immich WITH LOGIN PASSWORD 'dummypassword';
+ALTER ROLE immich WITH SUPERUSER;
+CREATE DATABASE immichdb
+WITH OWNER immich
+TEMPLATE template0
+ENCODING UTF8
+LC_COLLATE 'en_US.UTF-8'
+LC_CTYPE 'en_US.UTF-8';
+
+# Install pgvecto.rs extension
+\c immichdb
+CREATE EXTENSION vectors;
+```
+
+Next, create or verify local disk for immich backup
+
+```bash
+ssh dockerhost
+
+sudo mkdir -p /media/immich
+sudo mkfs.ext4 /dev/sdd
+sudo mount /dev/sdd /media/immich
+echo "/dev/sdd /media/immich ext4 defaults 0 2" | sudo tee -a /etc/fstab
+
+echo "/media/immich    192.168.1.135/24(rw,sync,no_subtree_check,no_root_squash)" | sudo tee -a /etc/exports
+sudo exportfs -a
+```
+
+After that, create a PV and PVC for the immich backup storage.
+
+```bash
+source .env
+envsubst < immich/persistence.yaml | kubectl apply -n immich -f -
+```
+
+Finally, deploy the Immich helm chart with the following values:
+
+```bash
+source .env
+helm upgrade --install \
+  --namespace immich immich oci://ghcr.io/immich-app/immich-charts/immich \
+  -f immich/values.yaml \
+  --set env.DB_USERNAME=$IMMICH_DB_USER \
+  --set env.DB_PASSWORD=$IMMICH_DB_PASSWORD \
+  --set env.DB_DATABASE_NAME=$IMMICH_DB_NAME \
+  --set server.ingress.main.hosts[0].host=$IMMICH_HOST \
+  --set server.ingress.main.tls[0].hosts[0]=$IMMICH_HOST \
+  --atomic
+```
+
+# Cron Jobs for Periodic Tasks
+
+## Update DNS Record
+
+This cronjob updates current public IP address to the DNS record in Cloudflare.
+The script to update DNS record is added to the cronjob as configmap and then
+mounted as a volume in the cronjob pod. The script uses the Cloudflare API
+to update the DNS record with the current public IP address.
+
+Currently the cronjob is scheduled to run every hour.
+
+```bash
+kubectl create namespace cronjobs --dry-run=client -o yaml | kubectl apply -f -
+kubectl create secret generic cloudflare-dns-token \
+  --from-literal=api-token=$CLOUDFLARE_TOKEN \
+  -n cronjobs
+kubectl apply -f cronjobs/update-dns/update_dns_config.yaml -n cronjobs
+kubectl apply -f cronjobs/update-dns/update_dns_cronjob.yaml -n cronjobs
 ```

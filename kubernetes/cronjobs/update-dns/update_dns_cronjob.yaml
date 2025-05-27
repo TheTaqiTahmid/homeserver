@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: update-dns-cronjob
+spec:
+  schedule: "15 * * * *"
+  concurrencyPolicy: Replace  # Add this line
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: cron-container
+            image: alpine/curl
+            command: ["/bin/sh", "-c"]
+            env:
+            - name: CLOUDFLARE_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflare-secret
+                  key: api-token
+            args:
+              - apk add --no-cache bash jq curl &&
+                /script/update_dns.sh
+            volumeMounts:
+            - name: script-volume
+              mountPath: /script
+          volumes:
+          - name: script-volume
+            configMap:
+              name: update-dns-script
+              defaultMode: 0777
+          restartPolicy: OnFailure

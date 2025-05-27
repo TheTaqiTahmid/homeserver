@@ -1,0 +1,33 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cluster-restore
+spec:
+  instances: 1
+  imageName: ghcr.io/tensorchord/cloudnative-pgvecto.rs:16.5-v0.3.0
+
+  # superuserSecret:
+  #   name: superuser-secret
+
+  bootstrap:
+    recovery:
+      source: pg-backup  # Name of the cluster to restore from
+
+  externalClusters:
+    - name: pg-backup  # Name of the cluster to restore from
+      barmanObjectStore:
+        destinationPath: s3://immich/
+        endpointURL: ${MINIO_ENDPOINT_URL}
+        s3Credentials:
+          accessKeyId:
+            name: minio-creds
+            key: ACCESS_KEY_ID
+          secretAccessKey:
+            name: minio-creds
+            key: ACCESS_SECRET_KEY
+        wal:
+          maxParallel: 4
+
+  storage:
+    storageClass: longhorn-2x
+    size: 5Gi
