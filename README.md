@@ -30,13 +30,17 @@
 - 🐳 Private Docker Registry
 - 🎬 Jellyfin Media Server
 - 🌐 Portfolio Website
+- 📷 Immich - Photo and Video Management
 - 🗄️ PostgreSQL Database
 - 📦 Pocketbase Backend
 - 🍵 Gitea Git Server and Actions for CI/CD
+- 📦 MinIO Object Storage - S3-compatible storage
+- 🔑 LLDAP - Lightweight LDAP Authentication Server
 
 ### 📋 Coming Soon
 
 - Nextcloud
+- Authentik - OpenID Connect and OAuth2 server (will replace LLDAP)
 - Monitoring Stack with Prometheus and Grafana
 
 ## 💻 Hardware Setup
@@ -44,6 +48,7 @@
 - 2x Mini PCs with Intel N100 CPUs
 - 16GB RAM each
 - 500GB SSDs
+- 2x 1 TB SATA SSDs
 - 1Gbps networking
 - Proxmox Cluster Configuration
 

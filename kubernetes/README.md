@@ -705,7 +705,10 @@ envsubst < cloud-native-pg/backup-recovery.yaml | kubectl apply -n immich -f -
 
 ## Create a new PostgreSQL cluster from existing Database
 
-To create a new PostgreSQL cluster from an existing database, you can use the `create-cluster.yaml` template. This template allows you to create a new PostgreSQL cluster from an existing database by specifying the necessary configurations and parameters in the YAML file.
+To create a new PostgreSQL cluster from an existing database, you can use the
+`create-cluster.yaml` template. This template allows you to create a new
+PostgreSQL cluster from an existing database by specifying the necessary
+configurations and parameters in the YAML file.
 
 # Immich Self-hosted Photo and Video Backup Solution
 
