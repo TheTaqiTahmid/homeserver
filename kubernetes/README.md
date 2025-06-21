@@ -512,7 +512,7 @@ kubectl get secret wildcard-cert-secret --namespace=cert-manager -o yaml \
 # The configMap contains the app.ini file values for gitea
 envsubst < gitea/configMap.yaml | kubectl apply -n gitea -f -
 
-helm install gitea gitea-charts/gitea -f gitea/values.yaml \
+helm upgrade --install gitea gitea-charts/gitea -f gitea/values.yaml \
   --namespace gitea \
   --atomic \
   --set ingress.hosts[0].host=$GITEA_HOST \
@@ -706,9 +706,20 @@ envsubst < cloud-native-pg/backup-recovery.yaml | kubectl apply -n immich -f -
 ## Create a new PostgreSQL cluster from existing Database
 
 To create a new PostgreSQL cluster from an existing database, you can use the
-`create-cluster.yaml` template. This template allows you to create a new
+`create-cluster-main.yaml` as template. This template allows you to create a new
 PostgreSQL cluster from an existing database by specifying the necessary
 configurations and parameters in the YAML file.
+
+This below example shows how I created a new PostgreSQL cluster from my existing
+main postgres database. The new cluster is created in the `postgres` namespace.
+The existing postgres database will be deprecated and removed in the future.
+
+```bash
+source .env
+envsubst < cloud-native-pg/secrets.yaml | kubectl apply -n postgres -f -
+envsubst < cloud-native-pg/create-cluster-main.yaml | kubectl apply -n postgres -f -
+kubectl apply -f cloud-native-pg/pg-main-backup.yaml -n postgres
+```
 
 # Immich Self-hosted Photo and Video Backup Solution
 

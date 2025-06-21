@@ -1,0 +1,49 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: master-postgres
+spec:
+  instances: 1
+  bootstrap:
+    initdb:
+      import:
+        type: monolith
+        databases:
+          - giteadb
+          - reservemaster
+        roles:
+          - gitea
+          - postgres
+          - taqi
+        source:
+          externalCluster: pg-main
+  storage:
+    size: 5Gi
+    storageClass: longhorn-2x
+  externalClusters:
+    - name: pg-main
+      connectionParameters:
+        host: 192.168.1.142
+        user: postgres
+        dbname: postgres
+      password:
+        name: my-postgres-postgresql
+        key: postgres-password
+  # Backup properties for MinIO
+  backup:
+    barmanObjectStore:
+      destinationPath: s3://pgmain
+      endpointURL: ${MINIO_ENDPOINT_URL}
+      s3Credentials:
+        accessKeyId:
+          name: minio-creds
+          key: ACCESS_KEY_ID
+        secretAccessKey:
+          name: minio-creds
+          key: ACCESS_SECRET_KEY
+      wal:
+        compression: gzip
+      data:
+        compression: gzip
+    retentionPolicy: "15d"
+
