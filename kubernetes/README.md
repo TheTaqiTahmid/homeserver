@@ -1,6 +1,6 @@
 # Setup K3s Kubernetes Cluster
 
-# Configure Traefik with extra values
+# Configure Traefik Ingress Controller
 
 The Traefik ingress controller is deployed along with K3s. To modify the
 default values,
@@ -11,6 +11,26 @@ helm upgrade traefik traefik/traefik \
   -n kube-system -f traefik/traefik-values.yaml \
   --version 22.1.0
 ```
+
+## Additional Ingress Controller for Internal Access
+
+An additional ingress controller is deployed for internal access to services.
+This ingress controller is used to access services that are not exposed to the
+internet. It is deployed in the `internal-ingress` namespace and uses the
+Traefik ingress controller.
+
+To utilize the internal ingress controller, add the following
+`ingressClassName: traefik-internal` under ingress spec.
+
+```bash
+helm upgrade --install \
+  --create-namespace traefik-internal traefik/traefik \
+  --namespace traefik-internal \
+  -f traefik/traefik-internal/values.yaml
+```
+
+The LoadBalancer service IP for the internal ingress controller is added to
+the adGuard DNS server to resolve the internal services.
 
 # Configure Cert Manager for automating SSL certificate handling
 
@@ -50,11 +70,11 @@ export KUBE_EDITOR=nvim
 kubectl -n kube-system edit configmap coredns
 ```
 
-Next, deploy the ClusterIssuer, WildcardCert, and secrets using helm
+Next, deploy the ClusterIssuer, WildcardCert, and secrets using helm chart.
 
 ```bash
 source .env
-helm install cert-handler cert-manager-helm-chart \
+helm install cert-handler cert-manager-config-helm-chart \
   --atomic --set secret.apiToken=$CLOUDFLARE_TOKEN \
   --set clusterIssuer.email=$EMAIL \
   --set wildcardCert.dnsNames[0]=$DNSNAME

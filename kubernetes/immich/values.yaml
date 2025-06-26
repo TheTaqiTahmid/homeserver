@@ -63,7 +63,7 @@ server:
       enabled: true
       annotations:
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
-        cert-manager.io/issuer: "letsencrypt-prod"
+        cert-manager.io/cluster-issuer: "acme-issuer"
       hosts:
         - host: placeholder.immich.app
           paths:
@@ -74,7 +74,7 @@ server:
             - placeholder.immich.app
 
 machine-learning:
-  enabled: false   # disabled due to resource constraints
+  enabled: false # disabled due to resource constraints
   image:
     repository: ghcr.io/immich-app/immich-machine-learning
     pullPolicy: IfNotPresent

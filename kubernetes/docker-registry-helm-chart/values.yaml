@@ -14,7 +14,7 @@ ingress:
   enabled: true
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    cert-manager.io/issuer: "letsencrypt-prod"
+    cert-manager.io/cluster-issuer: "acme-issuer"
   tls:
     enabled: true
     host: "*.example.com"

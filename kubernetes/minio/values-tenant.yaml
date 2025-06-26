@@ -36,7 +36,7 @@ tenant:
   #
   # An array of Kubernetes secrets to use for pulling images from a private ``image.repository``.
   # Only one array element is supported at this time.
-  imagePullSecret: { }
+  imagePullSecret: {}
   ###
   #
   # Specify `initContainers <https://kubernetes.io/docs/concepts/workloads/pods/init-containers/>`__ to perform setup or configuration tasks before the main Tenant pods starts.
@@ -60,12 +60,12 @@ tenant:
   #           done
   #           echo "IdP (${URL}) reachable. Starting MinIO..."
   #
-  initContainers: [ ]
+  initContainers: []
   ###
   # The Kubernetes `Scheduler <https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/>`__ to use for dispatching Tenant pods.
   #
   # Specify an empty dictionary ``{}`` to dispatch pods with the default scheduler.
-  scheduler: { }
+  scheduler: {}
   ###
   # Root key for dynamically creating a secret for use with configuring root MinIO User
   # Specify the ``name`` and then a list of environment variables.
@@ -94,10 +94,10 @@ tenant:
   poolsMetadata:
     ###
     # Specify `annotations <https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/>`__ to associate to Tenant pods.
-    annotations: { }
+    annotations: {}
     ###
     # Specify `labels <https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/>`__ to associate to Tenant pods.
-    labels: { }
+    labels: {}
 
   ###
   # If this variable is set to true, then enable the usage of an existing Kubernetes secret to set environment variables for the Tenant.
@@ -142,42 +142,42 @@ tenant:
       storageClassName: longhorn-2x
       ###
       # Specify `storageAnnotations <https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/>`__ to associate to PVCs.
-      storageAnnotations: { }
+      storageAnnotations: {}
       ###
       # Specify `storageLabels <https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/>`__ to associate to PVCs.
-      storageLabels: { }
+      storageLabels: {}
       ###
       # Specify `annotations <https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/>`__ to associate to Tenant pods.
-      annotations: { }
+      annotations: {}
       ###
       # Specify `labels <https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/>`__ to associate to Tenant pods.
-      labels: { }
+      labels: {}
       ###
       #
       # An array of `Toleration labels <https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/>`__ to associate to Tenant pods.
       #
       # These settings determine the distribution of pods across worker nodes.
-      tolerations: [ ]
+      tolerations: []
       ###
       # Any `Node Selectors <https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/>`__ to apply to Tenant pods.
       #
       # The Kubernetes scheduler uses these selectors to determine which worker nodes onto which it can deploy Tenant pods.
       #
       # If no worker nodes match the specified selectors, the Tenant deployment will fail.
-      nodeSelector: { }
+      nodeSelector: {}
       ###
       #
       # The `affinity <https://kubernetes.io/docs/tasks/configure-pod-container/assign-pods-nodes-using-node-affinity/>`__ or anti-affinity settings to apply to Tenant pods.
       #
       # These settings determine the distribution of pods across worker nodes and can help prevent or allow colocating pods onto the same worker nodes.
-      affinity: { }
+      affinity: {}
       ###
       #
       # The `Requests or Limits <https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/>`__ for resources to associate to Tenant pods.
       #
       # These settings can control the minimum and maximum resources requested for each pod.
       # If no worker nodes can meet the specified requests, the Operator may fail to deploy.
-      resources: { }
+      resources: {}
       ###
       # The Kubernetes `SecurityContext <https://kubernetes.io/docs/tasks/configure-pod-container/security-context/>`__ to use for deploying Tenant resources.
       #
@@ -208,7 +208,7 @@ tenant:
       # An array of `Topology Spread Constraints <https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/>`__ to associate to Operator Console pods.
       #
       # These settings determine the distribution of pods across worker nodes.
-      topologySpreadConstraints: [ ]
+      topologySpreadConstraints: []
       ###
       #
       # The name of a custom `Container Runtime <https://kubernetes.io/docs/concepts/containers/runtime-class/>`__ to use for the Operator Console pods.
@@ -240,7 +240,7 @@ tenant:
     # This is used by MinIO to verify TLS connections from clients using those CAs
     # If you omit this and have clients using TLS certificates minted by an external CA, those connections may fail with warnings around certificate verification.
     # See `Operator CRD: TenantSpec <https://min.io/docs/minio/kubernetes/upstream/reference/operator-crd.html#tenantspec>`__.
-    externalCaCertSecret: [ ]
+    externalCaCertSecret: []
     ###
     # Specify an array of Kubernetes secrets, where each entry corresponds to a secret contains the TLS private key and public certificate pair.
     #
@@ -257,7 +257,7 @@ tenant:
     #    You can pass the CA to the Operator to allow it to trust that cert.
     #    See `Self-Signed, Internal, and Private Certificates <https://min.io/docs/minio/kubernetes/upstream/operations/network-encryption.html#self-signed-internal-and-private-certificates>`__ for more information.
     #    This step may also be necessary for globally trusted CAs where you must provide intermediate certificates to the Operator to help build the full chain of trust.
-    externalCertSecret: [ ]
+    externalCertSecret: []
     ###
     # Enable automatic Kubernetes based `certificate generation and signing <https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster>`__
     requestAutoCert: false
@@ -272,13 +272,13 @@ tenant:
     # The default DNS name format is typically ``*.minio.default.svc.cluster.local``.
     #
     # See `Operator CRD: CertificateConfig <https://min.io/docs/minio/kubernetes/upstream/reference/operator-crd.html#certificateconfig>`__
-    certConfig: { }
+    certConfig: {}
   ###
   # MinIO features to enable or disable in the MinIO Tenant
   # See `Operator CRD: Features <https://min.io/docs/minio/kubernetes/upstream/reference/operator-crd.html#features>`__.
   features:
     bucketDNS: false
-    domains: { }
+    domains: {}
     enableSFTP: false
   ###
   # Array of objects describing one or more buckets to create during tenant provisioning.
@@ -289,31 +289,31 @@ tenant:
   #    - name: my-minio-bucket
   #      objectLock: false        # optional
   #      region: us-east-1        # optional
-  buckets: [ ]
+  buckets: []
   ###
   # Array of Kubernetes secrets from which the Operator generates MinIO users during tenant provisioning.
   #
   # Each secret should specify the ``CONSOLE_ACCESS_KEY`` and ``CONSOLE_SECRET_KEY`` as the access key and secret key for that user.
-  users: [ ]
+  users: []
   ###
   # The `PodManagement <https://kubernetes.io/docs/tutorials/stateful-application/basic-stateful-set/#pod-management-policy>`__ policy for MinIO Tenant Pods.
   # Can be "OrderedReady" or "Parallel"
   podManagementPolicy: Parallel
   # The `Liveness Probe <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes>`__ for monitoring Tenant pod liveness.
   # Tenant pods will be restarted if the probe fails.
-  liveness: { }
+  liveness: {}
   ###
   # `Readiness Probe <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>`__ for monitoring Tenant container readiness.
   # Tenant pods will be removed from service endpoints if the probe fails.
-  readiness: { }
+  readiness: {}
   ###
   # `Startup Probe <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>`__ for monitoring container startup.
   # Tenant pods will be restarted if the probe fails.
   # Refer
-  startup: { }
+  startup: {}
   ###
   # The `Lifecycle hooks <https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/>`__ for container.
-  lifecycle: { }
+  lifecycle: {}
   ###
   # Directs the Operator to deploy the MinIO S3 API and Console services as LoadBalancer objects.
   #
@@ -345,14 +345,14 @@ tenant:
   #
   #    $ k logs myminio-pool-0-0 -n default
   #    {"level":"INFO","errKind":"","time":"2022-04-07T21:49:33.740058549Z","message":"All MinIO sub-systems initialized successfully"}
-  logging: { }
+  logging: {}
   ###
   # serviceMetadata allows passing additional labels and annotations to MinIO and Console specific
   # services created by the operator.
-  serviceMetadata: { }
+  serviceMetadata: {}
   ###
   # Add environment variables to be set in MinIO container (https://github.com/minio/minio/tree/master/docs/config)
-  env: [ ]
+  env: []
   ###
   # PriorityClassName indicates the Pod priority and hence importance of a Pod relative to other Pods.
   # This is applied to MinIO pods only.
@@ -362,7 +362,7 @@ tenant:
   # An array of `Volumes <https://kubernetes.io/docs/concepts/storage/volumes/>`__ which the Operator can mount to Tenant pods.
   #
   # The volumes must exist *and* be accessible to the Tenant pods.
-  additionalVolumes: [ ]
+  additionalVolumes: []
   ###
   # An array of volume mount points associated to each Tenant container.
   #
@@ -375,7 +375,7 @@ tenant:
   #      mountPath: /path/to/mount
   #
   # The ``name`` field must correspond to an entry in the ``additionalVolumes`` array.
-  additionalVolumeMounts: [ ]
+  additionalVolumeMounts: []
   # Define configuration for KES (stateless and distributed key-management system)
   # Refer https://github.com/minio/kes
   #kes:
@@ -483,7 +483,7 @@ ingress:
   api:
     enabled: false
     ingressClassName:
-    labels: { }
+    labels: {}
     annotations:
     tls:
       - secretName: minio-tls
@@ -494,11 +494,11 @@ ingress:
     pathType: Prefix
   console:
     enabled: true
-    ingressClassName: "traefik"
-    labels: { }
+    ingressClassName: "traefik-internal"
+    labels: {}
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
-      cert-manager.io/issuer: "letsencrypt-prod"
+      cert-manager.io/cluster-issuer: "acme-issuer"
       traefik.ingress.kubernetes.io/service.serversTransport: insecure-transport
       traefik.ingress.kubernetes.io/router.middlewares: kube-system-ip-whitelist@kubernetescrd
     tls:
