@@ -494,7 +494,7 @@ ingress:
     pathType: Prefix
   console:
     enabled: true
-    ingressClassName: "traefik-internal"
+    ingressClassName: "nginx"
     labels: {}
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure

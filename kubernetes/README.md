@@ -16,21 +16,23 @@ helm upgrade traefik traefik/traefik \
 
 An additional ingress controller is deployed for internal access to services.
 This ingress controller is used to access services that are not exposed to the
-internet. It is deployed in the `internal-ingress` namespace and uses the
-Traefik ingress controller.
+internet. I have used the `ingress-nginx` controller for this purpose.
 
-To utilize the internal ingress controller, add the following
-`ingressClassName: traefik-internal` under ingress spec.
+The initial plan was to use the `traefik` ingress controller for both but due
+to short circuit issues with the external `traefik` ingress controller, I have
+switched to using `ingress-nginx` for internal access.
 
 ```bash
-helm upgrade --install \
-  --create-namespace traefik-internal traefik/traefik \
-  --namespace traefik-internal \
-  -f traefik/traefik-internal/values.yaml
+helm upgrade --install ingress-nginx ingress-nginx \
+  --repo https://kubernetes.github.io/ingress-nginx \
+  --namespace ingress-nginx --create-namespace
 ```
 
 The LoadBalancer service IP for the internal ingress controller is added to
 the adGuard DNS server to resolve the internal services.
+
+To utilize the internal ingress controller, add the following
+`ingressClassName: nginx` under ingress spec.
 
 # Configure Cert Manager for automating SSL certificate handling
 
@@ -662,7 +664,9 @@ helm install \
 ## Deploy MinIO Tenant
 
 The MinIO tenant is deployed in the `minio` namespace. The default values
-are overridden with local values-tenant.yaml file.
+are overridden with local values-tenant.yaml file. The minio console is exposed
+via internal ingress controller (nginx). Thus, it is only accessible from the
+internal network.
 
 ```bash
 source .env
