@@ -82,7 +82,9 @@ kubectl describe orders -n cert-manager
 Alternatively, it is possible to generate service specific certs
 in desired namespaces by deploying the Certificate resource in the namespace.
 
-# Deploy Private Docker Registry
+# Deploy Private Docker Registry (Deprecated)
+
+The private docker registry is depcrecated in favor of gitea image registry.
 
 Create a new namespace called docker-registry and deploy the private
 docker-registry.
