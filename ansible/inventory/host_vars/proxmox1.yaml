@@ -7,8 +7,8 @@ vm_list:
     disk_size: 30G
     ip: "192.168.1.151/24"
     gateway: "192.168.1.1"
-    nameserver1: "1.1.1.1"
-    nameserver2: "8.8.8.8"
+    nameserver1: "192.168.1.145"
+    nameserver2: "1.1.1.1"
   - id: 107
     name: "vm7"
     memory: 4096
@@ -16,7 +16,7 @@ vm_list:
     disk_size: 30G
     ip: "192.168.1.152/24"
     gateway: "192.168.1.1"
-    nameserver1: "1.1.1.1"
+    nameserver1: "192.168.1.145"
     nameserver2: "8.8.8.8"
 
 # cloud-init variables
