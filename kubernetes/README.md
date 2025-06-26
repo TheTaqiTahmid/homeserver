@@ -422,8 +422,9 @@ qBittorrent pod:
 curl ipinfo.io
 ```
 
-# PostgreSQL Database
+# PostgreSQL Database (Deprecated)
 
+`Bitnami PostgreSQL helm chart is removed in favor of CloudNativePG operator.`
 The PostgreSQL database uses the bitnami postgres helm chart with one primary
 and one replica statefulset, totaling 2 postgres pods.
 
