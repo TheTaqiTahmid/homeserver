@@ -6,11 +6,16 @@ The Traefik ingress controller is deployed along with K3s. To modify the
 default values,
 
 ```bash
-# k3s still uses traefik V2
-helm upgrade traefik traefik/traefik \
-  -n kube-system -f traefik/traefik-values.yaml \
-  --version 22.1.0
+helm upgrade --install traefik traefik/traefik \
+  -n kube-system \
+  --set ingressRoute.dashboard.enabled=true \
+  --set ingressRoute.dashboard.matchRule='Host(`dashboard.traefik`)' \
+  --set ingressRoute.dashboard.entryPoints={websecure} \
+  --set providers.kubernetesGateway.enabled=true \
+  --set gateway.namespacePolicy=All
 ```
+
+For security reason, the Traefik dashboard is removed after creation for now.
 
 ## Additional Ingress Controller for Internal Access
 

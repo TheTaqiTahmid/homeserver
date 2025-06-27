@@ -1,6 +1,6 @@
-- name: Create Proxmox VMs
+- name: Configure Proxmox VMs
   hosts: vms
   vars_files:
-    - ../secrets/vault.yaml  # Load the encrypted vault file
+    - ../secrets/vault.yaml # Load the encrypted vault file
   roles:
     - configure-vms
