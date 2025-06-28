@@ -1,8 +1,5 @@
 # 🏠 Homeserver Setup Guide: Kubernetes on Proxmox
 
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-
 ```
 © 2023 Taqi Tahmid
 ```
