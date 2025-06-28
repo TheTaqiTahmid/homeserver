@@ -1,0 +1,12 @@
+# custom-values.yaml
+config:
+  address: $VIP_ADDRESS
+env:
+  # Ensure the interface name is correct for the Nodes
+  # Can be found using `ip a` command
+  # For proxmox nodes, the interface name is usually `ens18`
+  vip_interface: ens18
+  cp_enable: true
+  svc_enable: false
+nodeSelector:
+  node-role.kubernetes.io/control-plane: "true"

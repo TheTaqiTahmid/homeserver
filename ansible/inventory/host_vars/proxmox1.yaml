@@ -17,7 +17,7 @@ vm_list:
     ip: "192.168.1.152/24"
     gateway: "192.168.1.1"
     nameserver1: "192.168.1.145"
-    nameserver2: "8.8.8.8"
+    nameserver2: "1.1.1.1"
 
 # cloud-init variables
 node: "homeserver1"
