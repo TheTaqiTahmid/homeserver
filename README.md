@@ -143,19 +143,6 @@ export MASTER1_IP=<ip>
 curl -sfL https://get.k3s.io | K3S_URL=https://${MASTER1_IP}:6443 K3S_TOKEN=${TOKEN} sh -
 ```
 
-#### MetalLB Load Balancer Setup
-
-```bash
-# Install MetalLB
-kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.7/config/manifests/metallb-native.yaml
-
-# Verify installation
-kubectl get pods -n metallb-system
-
-# Apply configuration
-kubectl apply -f /home/taqi/homeserver/k3s-infra/metallb/metallbConfig.yaml
-```
-
 **Quick Test:**
 
 ```bash

@@ -1,6 +1,73 @@
 # Setup K3s Kubernetes Cluster
 
-# Configure Traefik Ingress Controller
+## MetalLB Load Balancer Setup
+
+MetalLB is a load balancer implementation for bare metal Kubernetes clusters.
+It provides a way to expose services externally by assigning them an IP address
+from a pool of addresses. This is particularly useful for clusters that do not
+have a cloud provider load balancer. In this setup, MetalLB is used to provide
+a load balancer for the k3s cluster. The MetalLB configuration is applied
+from a YAML file that defines the IP address pool and the configuration for
+the load balancer.
+
+```bash
+# Install MetalLB
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.7/config/manifests/metallb-native.yaml
+
+# Verify installation
+kubectl get pods -n metallb-system
+
+# Apply configuration
+kubectl apply -f /home/taqi/homeserver/k3s-infra/metallb/metallbConfig.yaml
+```
+
+## Configure Kube-VIP for Load Balancing
+
+> **Note:**
+> This workflow is used to setup kube-vip after k3s is installed.
+> For a new installation, refer to the kube-vip documentation.
+> https://kube-vip.io/docs/usage/k3s/
+
+Kube-VIP is used to provide a virtual IP address for the k3s cluster. This acts
+as a load balancer for the controller nodes and provides a single IP address
+for accessing the k3s API server. The kube-vip is deployed as a DaemonSet in the
+`kube-system` namespace.
+
+```bash
+# Install kube-vip
+source .env
+helm repo add kube-vip https://kube-vip.github.io/helm-charts
+helm repo update
+helm upgrade --install kube-vip kube-vip/kube-vip \
+  -f kube-vip/values.yaml \
+  --namespace kube-system \
+  --set config.address=$VIP_ADDRESS
+```
+
+After deploying kube-vip, we need to modify the startup script for the control
+plane nodes to add the `tls-san` flag to the k3s server command. This is necessary
+to ensure that the k3s server uses the virtual IP address for the API server.
+
+```bash
+sudo vim /etc/systemd/system/k3s.service
+# The ExecStart line should look like this:
+ExecStart=/usr/local/bin/k3s \
+    server \
+        '--cluster-init' \
+        '--disable' \
+        'servicelb' \
+        '--tls-san' \
+        '$VIP_ADDRESS'
+
+# Then reload the systemd configuration and restart k3s
+sudo systemctl daemon-reload
+sudo systemctl restart k3s
+```
+
+Finally,update the kubeconfig file to use the virtual IP address for the API
+server.
+
+## Configure Traefik Ingress Controller
 
 The Traefik ingress controller is deployed along with K3s. To modify the
 default values,
@@ -17,7 +84,7 @@ helm upgrade --install traefik traefik/traefik \
 
 For security reason, the Traefik dashboard is removed after creation for now.
 
-## Additional Ingress Controller for Internal Access
+### Additional Ingress Controller for Internal Access
 
 An additional ingress controller is deployed for internal access to services.
 This ingress controller is used to access services that are not exposed to the
