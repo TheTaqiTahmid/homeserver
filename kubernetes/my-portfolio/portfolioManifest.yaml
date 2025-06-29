@@ -18,7 +18,7 @@ spec:
         - name: my-registry-secret
       containers:
         - name: portfolio-app
-          image: "${DOCKER_REGISTRY_HOST}/my-portfolio-app:latest"
+          image: "${DOCKER_REGISTRY_HOST}/taqi/portfolio/my-portfolio-app:latest"
           imagePullPolicy: Always
           ports:
             - containerPort: 80
