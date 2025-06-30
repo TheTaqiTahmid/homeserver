@@ -21,6 +21,8 @@ minio as the storage backend.
 
 ## Proxmox
 
+Ref: https://registry.terraform.io/providers/bpg/proxmox/latest/docs/data-sources/virtual_environment_hosts
+
 The Proxmox configuration is located in the `proxmox` directory.
 It uses the Proxmox provider to manage virtual machines and other resources.
 
