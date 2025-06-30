@@ -1,0 +1,22 @@
+apt_packages:
+  - curl
+  - vim
+  - htop
+
+# Kubernetes k0sctl configuration vars
+master1_ip: "192.168.1.151"
+master1_hostname: "vm6"
+master2_ip: "192.168.1.161"
+master2_hostname: "vm8"
+worker1_ip: "192.168.1.152"
+worker1_hostname: "vm7"
+worker2_ip: "192.168.1.162"
+worker2_hostname: "vm9"
+
+pod_CIDR: "10.244.0.0/16"
+service_CIDR: "10.96.0.0/12"
+metallb_ip_range: "192.168.1.201-192.168.1.220"
+
+k0s_version: "v1.33.2+k0s.0"
+metallb_version: "0.15.2"
+traefik_version: "36.2.0"
