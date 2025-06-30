@@ -6,7 +6,7 @@ namespace: adguard
 version: 0.1.0
 
 replicaCount: 1
-host: adguard.example.com  # Change this to your domain
+host: adguard.example.com # Change this to your domain
 
 deployment:
   adminContainerPort: 3000
@@ -36,14 +36,16 @@ ingress:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/affinity: "true"
-    traefik.ingress.kubernetes.io/session-cookie-name: "SESSIONID"
+    cert-manager.io/cluster-issuer: "acme-issuer"
   hosts:
-    - host: 
+    - host:
       paths:
         - /
   tls:
     enabled: true
-    secretName: wildcard-cert-secret
+    secretName: adguard-tls-cert
+    hosts:
+      - adguard.example.com
 
 pvc:
   claimName: adguard-pvc

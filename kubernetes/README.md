@@ -455,7 +455,9 @@ kubectl get secret wildcard-cert-secret --namespace=cert -o yaml \
   | sed 's/namespace: cert/namespace: adguard/' | kubectl apply -f -
 
 source .env
-helm install adguard \
+helm upgrade --install adguard \
+  -f adguard/values.yaml \
+  --set ingress.hosts[0].host=$ADGUARD_HOST \
   --set host=$ADGUARD_HOST \
   --atomic adguard-helm-chart
 ```
@@ -611,7 +613,7 @@ envsubst < gitea/configMap.yaml | kubectl apply -n gitea -f -
 
 helm upgrade --install gitea gitea-charts/gitea -f gitea/values.yaml \
   --namespace gitea \
-  --version 10.0.0 \
+  --version 11.0.1 \
   --atomic \
   --set ingress.hosts[0].host=$GITEA_HOST \
   --set ingress.tls[0].hosts[0]=$GITEA_HOST  \

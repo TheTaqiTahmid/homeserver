@@ -15,9 +15,8 @@ gitea:
     email: email
 
 image:
-  registry: ghcr.io
   repository: gitea
-  tag: 1.23.7
+  tag: 1.24.2
 
 postgresql:
   enabled: false
@@ -47,7 +46,7 @@ resources:
 ingress:
   enabled: true
   annotations:
-    kubernetes.io/ingress.class: traefik
+    spec.ingressClassName: traefik
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     cert-manager.io/cluster-issuer: "acme-issuer"
   hosts:
