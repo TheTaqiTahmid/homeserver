@@ -742,10 +742,10 @@ internal network.
 
 ```bash
 source .env
-kubectl create namespace minio
 helm upgrade --install minio-tenant \
   minio/tenant \
   --namespace minio \
+  --create-namespace \
   -f minio/values-tenant.yaml \
   --set tenant.configSecret.accessKey=$MINIO_ROOT_USER \
   --set tenant.configSecret.secretKey=$MINIO_ROOT_PASSWORD \
