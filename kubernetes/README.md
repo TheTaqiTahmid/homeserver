@@ -178,7 +178,8 @@ in desired namespaces by deploying the Certificate resource in the namespace.
 
 # Deploy Private Docker Registry (Deprecated)
 
-The private docker registry is depcrecated in favor of gitea image registry.
+> **Note:** The docker registry helm chart is deprecated in favor of gitea image
+> registry.
 
 Create a new namespace called docker-registry and deploy the private
 docker-registry.
@@ -194,7 +195,12 @@ kubectl create secret generic registry-credentials \
   -n docker-registry
 ```
 
-Next, deploy the docker registry with helm chart:
+Next, deploy the docker registry with helm chart. In the PVC, the following
+annotation is added to ensure that the PVC is not deleted when the helm
+chart is deleted. This is useful to retain the images in the registry even
+after the helm chart is deleted.
+
+`helm.sh/resource-policy: "keep"`
 
 ```bash
 source .env

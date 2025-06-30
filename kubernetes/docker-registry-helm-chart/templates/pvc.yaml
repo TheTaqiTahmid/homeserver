@@ -3,9 +3,11 @@ kind: PersistentVolumeClaim
 metadata:
   name: {{ .Values.pvc.claimName }}
   namespace: {{ .Values.namespace }}
+  annotations:
+    helm.sh/resource-policy: "keep"
 spec:
   accessModes:
-    - {{  .Values.pvc.accessMode }}
+    - {{ .Values.pvc.accessMode }}
   resources:
     requests:
       storage: {{ .Values.pvc.size }}
