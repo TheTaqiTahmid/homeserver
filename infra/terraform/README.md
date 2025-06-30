@@ -23,3 +23,13 @@ minio as the storage backend.
 
 The Proxmox configuration is located in the `proxmox` directory.
 It uses the Proxmox provider to manage virtual machines and other resources.
+
+The workflow for managing Proxmox resources is as follows:
+
+```bash
+cd proxmox
+source .env
+tofu init
+tofu plan
+tofu apply
+```

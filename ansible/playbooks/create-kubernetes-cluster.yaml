@@ -1,6 +1,0 @@
-- name: Create Kubernetes Cluster
-  hosts: vms
-  vars_files:
-    - ../secrets/vault.yaml
-  roles:
-    - create-kubernetes-cluster
