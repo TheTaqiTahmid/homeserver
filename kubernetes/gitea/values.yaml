@@ -15,6 +15,7 @@ gitea:
     email: email
 
 image:
+  registry: ghcr.io
   repository: gitea
   tag: 1.23.7
 
@@ -45,13 +46,17 @@ resources:
 
 ingress:
   enabled: true
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    cert-manager.io/cluster-issuer: "acme-issuer"
   hosts:
     - host: git.example.com
       paths:
         - path: /
           pathType: Prefix
   tls:
-    - secretName: wildcard-cert-secret
+    - secretName: gitea-tls-cert
       hosts:
         - "*.example.com"
 

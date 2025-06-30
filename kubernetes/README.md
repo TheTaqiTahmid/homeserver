@@ -213,7 +213,7 @@ registry.
 kubectl create namespace my-portfolio
 
 source .env
-kubectl create secret docker-registry my-registry-secret \
+kubectl create secret docker-registry docker-registry-credentials \
   --docker-server="$DOCKER_REGISTRY_HOST" \
   --docker-username="$DOCKER_USER" \
   --docker-password="$DOCKER_PASSWORD" \
@@ -611,9 +611,10 @@ envsubst < gitea/configMap.yaml | kubectl apply -n gitea -f -
 
 helm upgrade --install gitea gitea-charts/gitea -f gitea/values.yaml \
   --namespace gitea \
+  --version 10.0.0 \
   --atomic \
   --set ingress.hosts[0].host=$GITEA_HOST \
-  --set ingress.tls[0].hosts[0]=$DNSNAME  \
+  --set ingress.tls[0].hosts[0]=$GITEA_HOST  \
   --set gitea.admin.username=$GITEA_USER \
   --set gitea.admin.password=$GITEA_PASSWORD \
   --set gitea.admin.email=$GITEA_EMAIL \
