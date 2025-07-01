@@ -33,3 +33,14 @@ variable "docker_password" {
   description = "Docker registry password"
   type        = string
 }
+
+variable "kubernetes_project_path" {
+  description = "Path to the Kubernetes configuration files"
+  type        = string
+  default     = "../../../kubernetes"
+}
+
+variable "vip_address" {
+  description = "VIP address for kube-vip"
+  type        = string
+}

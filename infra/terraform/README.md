@@ -7,12 +7,12 @@
 This directory contains Terraform configurations for managing
 infrastructure resources. It includes configurations for Proxmox.
 
-The plan is to eventually migrate all infrastructure management to Terraform,
-including Kubernetes clusters and other resources. Currently, the Proxmox
-configuration is fully managed by Terraform, while Kubernetes resources are
-managed using Helm charts and kubectl commands. Previously, the Proxmox
-configuration was managed using Ansible, but it has been migrated to Terraform
-for better consistency and state management.
+Currently, only the Proxmox virtual machines are managed using Terraform.
+Kubernetes clusters are still created with Ansible, and Kubernetes resources are
+managed using Helm charts and kubectl. Previously, Proxmox was also managed with
+Ansible, but it has been moved to Terraform for improved consistency and state
+management. The goal is to eventually manage all infrastructure—including
+Kubernetes clusters—using Terraform.
 
 The terraform state files are stored in a remote backend, which allows for
 collaboration and state management across different environments. The backend
