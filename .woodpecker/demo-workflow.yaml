@@ -1,7 +1,6 @@
 when:
   - branch: master
-    event: push
-    event: pull_request
+    event: push, pull_request
   - branch: feature/*
     event: push
 
