@@ -1,7 +1,9 @@
 when:
-  - event: push
   - branch: master
+    event: push
+    event: pull_request
   - branch: feature/*
+    event: push
 
 steps:
   - name: build
