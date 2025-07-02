@@ -4,10 +4,6 @@
 © 2023 Taqi Tahmid
 ```
 
-> Build your own modern homelab with Kubernetes on Proxmox! This guide walks
-> you through setting up a complete home server infrastructure with essential
-> self-hosted services.
-
 ## 🌟 Highlights
 
 - Fully automated setup using Ansible
