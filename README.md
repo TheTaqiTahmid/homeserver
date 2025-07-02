@@ -3,7 +3,7 @@
 # 🏠 Homeserver Setup Guide: Kubernetes on Proxmox
 
 ```
-© 2023 Taqi Tahmid
+© 2025 Taqi Tahmid
 ```
 
 ## 🌟 Highlights
