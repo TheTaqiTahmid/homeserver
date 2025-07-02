@@ -1,6 +1,7 @@
 when:
   - event: push
-  - branch: *
+  - branch: master
+  - branch: feature/*
 
 steps:
   - name: build
