@@ -11,8 +11,8 @@ Currently, only the Proxmox virtual machines are managed using Terraform.
 Kubernetes clusters are still created with Ansible, and Kubernetes resources are
 managed using Helm charts and kubectl. Previously, Proxmox was also managed with
 Ansible, but it has been moved to Terraform for improved consistency and state
-management. The goal is to eventually manage all infrastructure—including
-Kubernetes clusters—using Terraform.
+management. The goal is to eventually manage all infrastructure including
+creating Kubernetes clusters with Terraform, but this is a work in progress.
 
 The terraform state files are stored in a remote backend, which allows for
 collaboration and state management across different environments. The backend

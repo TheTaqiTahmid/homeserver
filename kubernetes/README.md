@@ -914,3 +914,37 @@ kubectl create secret generic cloudflare-dns-token \
 kubectl apply -f cronjobs/update-dns/update_dns_config.yaml -n cronjobs
 kubectl apply -f cronjobs/update-dns/update_dns_cronjob.yaml -n cronjobs
 ```
+
+# Woodpecker CI
+
+Woodpecker is a lightweight CI/CD server that is deployed in the k3s cluster.
+
+Since Woodpecker uses Oauth2 for authentication, it requires a Gitea
+application to be created for Woodpecker to use for authentication.
+
+First, create a new application in Gitea for Woodpecker. The path to create the
+application is:
+`https://<your-gitea-domain>/user/settings/applications/`
+
+The application should have the following settings:
+
+- **Application Name**: Woodpecker
+- **Redirect URI**: https://<your-woodpecker-domain>/authorize
+
+```bash
+source .env
+helm repo add woodpecker https://woodpecker-ci.org/
+helm repo update
+helm upgrade --install woodpecker woodpecker/woodpecker \
+  -f woodpecker-ci/values.yaml \
+  --version 3.2.0 \
+  --namespace woodpecker \
+  --create-namespace \
+  --set server.ingress.hosts[0].host=$WOODPECKER_HOST \
+  --set server.ingress.tls[0].hosts[0]=$WOODPECKER_HOST \
+  --set server.env.WOODPECKER_HOST=https://$WOODPECKER_HOST \
+  --set server.env.WOODPECKER_GITEA_URL=https://$GITEA_HOST \
+  --set server.env.WOODPECKER_GITEA_CLIENT=$WOODPECKER_CLIENT_ID \
+  --set server.env.WOODPECKER_GITEA_SECRET=$WOODPECKER_CLIENT_SECRET \
+  --atomic
+```
