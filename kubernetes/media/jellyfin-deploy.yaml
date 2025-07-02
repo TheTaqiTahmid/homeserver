@@ -71,36 +71,64 @@ spec:
       targetPort: 8096
   type: ClusterIP
 
+# ---
+# apiVersion: traefik.io/v1alpha1
+# kind: IngressRoute
+# metadata:
+#   name: jellyfin-ingress
+#   annotations:
+#     traefik.ingress.kubernetes.io/router.middlewares: jellyfin-headers@kubernetescrd
+# spec:
+#   entryPoints:
+#     - websecure
+#   routes:
+#     - match: Host(`${JELLYFIN_HOST}`)
+#       kind: Rule
+#       services:
+#         - name: jellyfin-service
+#           port: 8096
+#   tls:
+#     secretName: jellyfin-tls-secret
+
+# ---
+# apiVersion: traefik.io/v1alpha1
+# kind: Middleware
+# metadata:
+#   name: jellyfin-headers
+# spec:
+#   headers:
+#     customRequestHeaders:
+#       X-Forwarded-Proto: "https"
+#     customResponseHeaders:
+#       X-Frame-Options: "SAMEORIGIN"
+
 ---
-apiVersion: traefik.io/v1alpha1
-kind: IngressRoute
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
   name: jellyfin-ingress
   annotations:
-    traefik.ingress.kubernetes.io/router.middlewares: jellyfin-headers@kubernetescrd
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+    nginx.ingress.kubernetes.io/server-header: "X-Frame-Options SAMEORIGIN"
+    nginx.ingress.kubernetes.io/proxy-set-header: "X-Forwarded-Proto https"
 spec:
-  entryPoints:
-    - websecure
-  routes:
-    - match: Host(`${JELLYFIN_HOST}`)
-      kind: Rule
-      services:
-        - name: jellyfin-service
-          port: 8096
+  ingressClassName: nginx
+  rules:
+    - host: ${JELLYFIN_HOST}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: jellyfin-service
+                port:
+                  number: 8096
   tls:
-    secretName: jellyfin-tls-secret
-
----
-apiVersion: traefik.io/v1alpha1
-kind: Middleware
-metadata:
-  name: jellyfin-headers
-spec:
-  headers:
-    customRequestHeaders:
-      X-Forwarded-Proto: "https"
-    customResponseHeaders:
-      X-Frame-Options: "SAMEORIGIN"
+    - hosts:
+        - ${JELLYFIN_HOST}
+      secretName: jellyfin-tls-secret
 
 ---
 apiVersion: cert-manager.io/v1
