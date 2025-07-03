@@ -1,4 +1,4 @@
-[![status-badge](https://woodpecker.home.tahmidcloud.com/api/badges/1/status.svg)](https://woodpecker.home.tahmidcloud.com/repos/1)
+[![status-badge](https://ci.tahmidcloud.com/api/badges/1/status.svg)](https://ci.tahmidcloud.com/repos/1)
 
 # 🏠 Homeserver Setup Guide: Kubernetes on Proxmox
 
