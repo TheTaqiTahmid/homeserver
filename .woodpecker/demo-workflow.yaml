@@ -1,7 +1,5 @@
 when:
-  - event: push
-    branch: master
-
+  - event: [push, manual]
 steps:
   - name: build
     image: ubuntu:22.04

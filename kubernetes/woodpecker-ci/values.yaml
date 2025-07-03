@@ -26,7 +26,7 @@ agent:
 
   env:
     # -- Add the environment variables for the agent component
-    WOODPECKER_SERVER: 'woodpecker-server:9000'
+    WOODPECKER_SERVER: "woodpecker-server.woodpecker.svc.cluster.local:9000"
     WOODPECKER_BACKEND: kubernetes
     WOODPECKER_BACKEND_K8S_NAMESPACE: woodpecker
     WOODPECKER_BACKEND_K8S_STORAGE_CLASS: ""
@@ -188,21 +188,23 @@ server:
   # -- Add environment variables for the server component
   env:
     WOODPECKER_ADMIN: "taqi"
-    WOODPECKER_HOST: "placeholder.woodpecker.svc.cluster.local:9000"
+    WOODPECKER_HOST: "woodpecker-server.woodpecker.svc.cluster.local:9000"
     WOODPECKER_GITEA: "true"
-    WOODPECKER_GITEA_URL: "${GITEA_HOST}"
-    WOODPECKER_GITEA_CLIENT: "${WOODPECKER_CLIENT_ID}"
-    WOODPECKER_GITEA_SECRET: "${WOODPECKER_CLIENT_SECRET}"
-
-    # WOODPECKER_GITHUB: "true"
 
   # -- Add extra environment variables from the secrets list
-  extraSecretNamesForEnvFrom: []
+  extraSecretNamesForEnvFrom:
+    - gitea-secret
+    # - secret
 
   # whether to create the default WOODPECKER_AGENT_SECRET in woodpecker-default-agent-secret
   createAgentSecret: true
   # -- Create a generic secret to store things in, e.g. env values
-  secrets: []
+  secrets:
+    - name: gitea-secret
+      data:
+        WOODPECKER_GITEA_URL: placeholder
+        WOODPECKER_GITEA_CLIENT: placeholder
+        WOODPECKER_GITEA_SECRET: placeholder
   # - name: secret
   #   data:
   #     key: value

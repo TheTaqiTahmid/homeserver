@@ -937,14 +937,14 @@ helm repo add woodpecker https://woodpecker-ci.org/
 helm repo update
 helm upgrade --install woodpecker woodpecker/woodpecker \
   -f woodpecker-ci/values.yaml \
-  --version 3.2.0 \
+  --version 3.1.0 \
   --namespace woodpecker \
   --create-namespace \
   --set server.ingress.hosts[0].host=$WOODPECKER_HOST \
   --set server.ingress.tls[0].hosts[0]=$WOODPECKER_HOST \
   --set server.env.WOODPECKER_HOST=https://$WOODPECKER_HOST \
-  --set server.env.WOODPECKER_GITEA_URL=https://$GITEA_HOST \
-  --set server.env.WOODPECKER_GITEA_CLIENT=$WOODPECKER_CLIENT_ID \
-  --set server.env.WOODPECKER_GITEA_SECRET=$WOODPECKER_CLIENT_SECRET \
+  --set server.secrets[0].data.WOODPECKER_GITEA_URL=https://$GITEA_HOST \
+  --set server.secrets[0].data.WOODPECKER_GITEA_CLIENT=$WOODPECKER_CLIENT_ID \
+  --set server.secrets[0].data.WOODPECKER_GITEA_SECRET=$WOODPECKER_CLIENT_SECRET \
   --atomic
 ```
