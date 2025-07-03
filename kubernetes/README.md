@@ -937,7 +937,7 @@ helm repo add woodpecker https://woodpecker-ci.org/
 helm repo update
 helm upgrade --install woodpecker woodpecker/woodpecker \
   -f woodpecker-ci/values.yaml \
-  --version 3.1.0 \
+  --version 3.2.0 \
   --namespace woodpecker \
   --create-namespace \
   --set server.ingress.hosts[0].host=$WOODPECKER_HOST \

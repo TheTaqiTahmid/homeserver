@@ -294,7 +294,7 @@ server:
     # kubernetes.io/tls-acme: "true"
 
     # -- Defines which ingress controller will implement the resource
-    ingressClassName: "nginx"
+    ingressClassName: "traefik"
 
     hosts:
       - host: example.com
