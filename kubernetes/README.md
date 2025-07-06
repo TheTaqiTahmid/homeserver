@@ -510,7 +510,11 @@ qBittorrent and wireguard. For security, qBittorrent is not exposed outside the
 network via ingress. It is accessible locally via loadbalancer IP address.
 
 ```bash
-helm install qbittorrent qbittorrent-helm-chart/ --atomic
+source .env
+helm upgrade --install \
+  qbittorrent qbittorrent-helm-chart/ \
+  --set ingress.host=$QBITTORRENT_HOST \
+  --atomic
 ```
 
 After deployment, verify qBittorrent is accessible on the loadbalancer IP and
@@ -937,7 +941,7 @@ helm repo add woodpecker https://woodpecker-ci.org/
 helm repo update
 helm upgrade --install woodpecker woodpecker/woodpecker \
   -f woodpecker-ci/values.yaml \
-  --version 3.2.0 \
+  --version 3.2.1 \
   --namespace woodpecker \
   --create-namespace \
   --set server.ingress.hosts[0].host=$WOODPECKER_HOST \

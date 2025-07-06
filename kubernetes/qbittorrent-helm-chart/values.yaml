@@ -13,7 +13,7 @@ deployment:
 qbittorrentImage:
   repository: linuxserver/qbittorrent
   tag: latest
-  pullPolicy:   Always
+  pullPolicy: Always
 
 wireguardImage:
   repository: linuxserver/wireguard
@@ -22,9 +22,16 @@ wireguardImage:
 
 service:
   name: qbittorrent-service
-  type: LoadBalancer
+  type: ClusterIP
   port: 8080
   wireguardPort: 51820
+
+ingress:
+  name: qbittorrent-ingress
+  host: placeholder
+  ingressClassName: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: "acme-issuer"
 
 persistence:
   config:
