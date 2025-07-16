@@ -11,42 +11,42 @@ vms = [
     gateway     = "192.168.1.1"
     dns_servers = ["192.168.1.145", "1.1.1.1"]
     cores       = 2
-    memory      = 2048
+    memory      = 4096
     disk_size   = 20
   },
   {
     name        = "vm7"
-    node_name   = "homeserver1"
-    vm_id       = 106
-    ip_address  = "192.168.1.152/24"
-    gateway     = "192.168.1.1"
-    dns_servers = ["192.168.1.145", "1.1.1.1"]
-    cores       = 2
-    memory      = 2048
-    disk_size   = 20
-  },
-  {
-    name        = "vm8"
     node_name   = "homeserver2"
     vm_id       = 205
     ip_address  = "192.168.1.161/24"
     gateway     = "192.168.1.1"
     dns_servers = ["192.168.1.145", "1.1.1.1"]
     cores       = 2
-    memory      = 2048
+    memory      = 4096
     disk_size   = 20
   },
   {
-    name        = "vm9"
-    node_name   = "homeserver2"
-    vm_id       = 206
-    ip_address  = "192.168.1.162/24"
+    name        = "vm8"
+    node_name   = "homeserver3"
+    vm_id       = 301
+    ip_address  = "192.168.1.172/24"
     gateway     = "192.168.1.1"
     dns_servers = ["192.168.1.145", "1.1.1.1"]
     cores       = 2
-    memory      = 2048
-    disk_size   = 20
+    memory      = 4096
+    disk_size   = 50
+  },
+  {
+    name        = "vm9"
+    node_name   = "homeserver3"
+    vm_id       = 302
+    ip_address  = "192.168.1.173/24"
+    gateway     = "192.168.1.1"
+    dns_servers = ["192.168.1.145", "1.1.1.1"]
+    cores       = 2
+    memory      = 4096
+    disk_size   = 50
   }
 ]
 
-nodes = ["homeserver1", "homeserver2"]
+nodes = ["homeserver1", "homeserver2", "homeserver3"]

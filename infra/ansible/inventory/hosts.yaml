@@ -7,19 +7,27 @@ hypervisors:
   children:
     server1:
     server2:
+    server3:
 
 server1:
   hosts:
     proxmox1:
       ansible_host: 192.168.1.121
-      ansible_user:  "{{ ansible_proxmox_user }}"
+      ansible_user: "{{ ansible_proxmox_user }}"
       ansible_ssh_private_key_file: "{{ ansible_ssh_private_key_file }}"
 
 server2:
   hosts:
     proxmox2:
       ansible_host: 192.168.1.122
-      ansible_user:  "{{ ansible_proxmox_user }}"
+      ansible_user: "{{ ansible_proxmox_user }}"
+      ansible_ssh_private_key_file: "{{ ansible_ssh_private_key_file }}"
+
+server3:
+  hosts:
+    proxmox3:
+      ansible_host: 192.168.1.123
+      ansible_user: "{{ ansible_proxmox_user }}"
       ansible_ssh_private_key_file: "{{ ansible_ssh_private_key_file }}"
 
 vms:
@@ -48,4 +56,3 @@ vm_group_2:
       ansible_host: 192.168.1.162
       ansible_user: "{{ ansible_vm_user }}"
       ansible_ssh_private_key_file: "{{ ansible_ssh_private_key_file }}"
-

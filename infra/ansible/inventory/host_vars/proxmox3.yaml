@@ -1,0 +1,29 @@
+# VM related variables
+vm_list:
+  - id: 301
+    name: "vm10"
+    memory: 4096
+    cores: 2
+    disk_size: 30G
+    ip: "192.168.1.172/24"
+    gateway: "192.168.1.1"
+    nameserver1: "192.168.1.145"
+    nameserver2: "1.1.1.1"
+  - id: 302
+    name: "vm11"
+    memory: 4096
+    cores: 2
+    disk_size: 30G
+    ip: "192.168.1.173/24"
+    gateway: "192.168.1.1"
+    nameserver1: "192.168.1.145"
+    nameserver2: "1.1.1.1"
+
+# cloud-init template variables
+node: "homeserver3"
+net0: "virtio,bridge=vmbr0"
+# disk_name: "local:2000/vm-2000-disk-0.raw,discard=on"
+disk_path: "/var/lib/vz/images/3000"
+ide2: "local:cloudinit,format=qcow2"
+boot_order: "order=scsi0"
+scsi_hw: "virtio-scsi-pci"

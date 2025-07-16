@@ -108,6 +108,26 @@ qm set 103 -scsi2 /dev/disk/by-id/usb-WD_BLACK_SN770_1TB_012938055C4B-0:0
 grep 5C4B /etc/pve/qemu-server/103.conf
 ```
 
+#### Proxmox How to Join a Cluster with Live VM
+
+Proxmox does not allow nodes to join a cluster with guest VMs running or existing.
+The workaround is to backup existing configuration files, join the cluster, and
+then restore the files.
+
+```bash
+mkdir -p /root/guest-backup/qemu /root/guest-backup/lxc
+cp /etc/pve/qemu-server/*.conf /root/guest-backup/qemu/
+cp /etc/pve/lxc/*.conf /root/guest-backup/lxc/
+rm /etc/pve/qemu-server/*.conf
+rm /etc/pve/lxc/*.conf
+
+# After that, join the node from GUI
+
+# Finally restore the configuration files
+cp /root/guest-backup/qemu/*.conf /etc/pve/qemu-server/
+cp /root/guest-backup/lxc/*.conf /etc/pve/lxc/
+```
+
 > 📚 Reference: [Proxmox Disk Passthrough Guide](<https://pve.proxmox.com/wiki/Passthrough_Physical_Disk_to_Virtual_Machine_(VM)>)
 
 ### 2. Kubernetes Cluster Setup

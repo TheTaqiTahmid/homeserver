@@ -29,9 +29,9 @@ tenant:
   #
   #
   image:
-    repository: quay.io/minio/minio
-    tag: RELEASE.2025-04-08T15-41-24Z
-    pullPolicy: IfNotPresent
+    repository: docker.io/minio/minio
+    tag: RELEASE.2025-06-13T11-33-47Z-cpuv1
+    pullPolicy: Always
   ###
   #
   # An array of Kubernetes secrets to use for pulling images from a private ``image.repository``.

@@ -66,7 +66,7 @@ variable "vms" {
 
 variable "nodes" {
   type    = list(string)
-  default = ["homeserver1", "homeserver2"]
+  default = ["homeserver1", "homeserver2", "homeserver3"]
 }
 
 variable "vm_user_name" {
