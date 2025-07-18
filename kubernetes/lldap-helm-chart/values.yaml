@@ -7,7 +7,6 @@ secret:
   lldapUserPass: "placeholder"
   lldapBaseDn: "dc=homelab,dc=local"
 
-
 ##### pvc
 persistence:
   enabled: true
@@ -39,12 +38,12 @@ env:
 extraEnv: []
 
 resources:
- limits:
-   cpu: 100m
-   memory: 100Mi
- requests:
-   cpu: 50m
-   memory: 50M
+  limits:
+    cpu: 100m
+    memory: 100Mi
+  requests:
+    cpu: 50m
+    memory: 50M
 
 nodeSelector: {}
 
@@ -58,7 +57,6 @@ image:
   repository: "nitnelave/lldap"
   tag: "v0.6.1"
   pullPolicy: "IfNotPresent"
-
 
 #### service this is unique service, so no enabled is added as if not it wont work
 service:
@@ -79,10 +77,11 @@ service:
 
 #####ingress
 ingress:
-  ingressClassName: "traefik"
+  ingressClassName: "nginx"
   enabled: true
   name: lldap-web-ingress
-  annotations: {}
+  annotations:
+    cert-manager.io/cluster-issuer: "acme-issuer"
   labels: {}
   hosts:
     host: "placeholder.test.com"
@@ -90,8 +89,6 @@ ingress:
       path: "/"
       pathType: "Prefix"
   tls:
-    - secretName: "lldap-secret-tls"
+    - secretName: lldap-tls-cert
       hosts:
         - "placeholder.test.com"
-
-

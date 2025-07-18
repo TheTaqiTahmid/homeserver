@@ -710,10 +710,10 @@ kubectl create namespace ldap
 kubectl get secret wildcard-cert-secret --namespace=cert-manager -o yaml \
   | sed 's/namespace: cert-manager/namespace: ldap/' | kubectl apply -f -
 
-helm install ldap \
-  lldap-helm-chart/ \
+helm upgrade --install ldap \
+  lldap-helm-chart/ -f lldap-helm-chart/values.yaml \
   --set ingress.hosts.host=$LDAP_HOST \
-  --set ingress.tls[0].hosts[0]=$DNSNAME \
+  --set ingress.tls[0].hosts[0]=$LDAP_HOST \
   --set secret.lldapUserName=$LLDAP_ADMIN_USER \
   --set secret.lldapJwtSecret=$LLDAP_JWT_SECRET \
   --set secret.lldapUserPass=$LLDAP_ADMIN_PASSWORD \
