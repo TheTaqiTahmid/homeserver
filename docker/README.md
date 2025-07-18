@@ -1,23 +1,9 @@
-Homeserver Notes
-================
-
-# Future Plan
-
-  - Add authentication frontend like Authentik which will handle the authentication
-  - Add Nextcloud
-  - Add Gitea
+# Homeserver Notes
 
 # List of Service Running on Homeserver
 
-    - Adguard
-    - Plex
-    - Sonarr
-    - Radarr
-    - qbittorrent
-    - Portainer
-    - Jackett
-    - Jellyfin
-    - Wireguard
+- Plex
+- Home Assistant
 
 # List of Basic CLI tools installed on server
 
@@ -31,7 +17,6 @@ Homeserver Notes
     - apache2-utils
     - apt-transport-https
     - htop
-
 
 # Firewall Rules (Currently Disabled)
 
@@ -71,16 +56,14 @@ processor, we have HW transcoding. Here is the process to enable it:
 
     ```
 
-
 # Traefik Reverse proxy
 
-   - Traefik is modern HTTP reverse proxy and load balancerthat can be used to route
-     traffic to different internal containers or ports based on subdomain name.
+- Traefik is modern HTTP reverse proxy and load balancerthat can be used to route
+  traffic to different internal containers or ports based on subdomain name.
 
-   - In addition to that It can also automatically handle SSL certificate genertion
-     and renewal for HTTPS automatically handle SSL certificate genertion
-     and renewal for HTTPS.
-
+- In addition to that It can also automatically handle SSL certificate genertion
+  and renewal for HTTPS automatically handle SSL certificate genertion
+  and renewal for HTTPS.
 
 ## Configuration
 
@@ -90,6 +73,7 @@ the ownership of the domain by adding specific DNS records.
 
 To do that with cloudflare, I have created a new API token with name _CF_DNS_API_TOKEN_
 and saved it as docker secret under ~/docker/secrets directory
+
 ```
 # To save the appdata for traefik3, created the following folders
 mkdir -p ~/docker/appdata/traefik3/acme
@@ -103,7 +87,9 @@ chmod 600 acme.json  # without 600, Traefik will not start
 touch traefik.log
 touch access.log
 ```
+
 After creating the Docker Compose file, add these TLS options like this:
+
 ```
 # Under DOCKERDIR/appdata/traefik3/rules/udms/tls-opts.yml
 tls:
@@ -126,7 +112,9 @@ tls:
         - CurveP384
       sniStrict: true
 ```
+
 Add the middleware Basic Auth:
+
 ```
 # Under DOCKERDIR/appdata/traefik3/rules/udms/middlewares-basic-auth.yml
 http:
@@ -139,7 +127,9 @@ http:
         realm: "Traefik 3 Basic Auth"
 
 ```
+
 Add middleware rate limited to prevent DDoS attack
+
 ```
 # Under DOCKERDIR/appdata/traefik3/rules/udms/middlewares-rate-limit.yaml
 http:
@@ -149,7 +139,9 @@ http:
         average: 100
         burst: 50
 ```
+
 Add secure headers middleware
+
 ```
 # Under DOCKERDIR/appdata/traefik3/rules/udms/middlewares-secure-headers.yaml
 http:
@@ -186,61 +178,66 @@ Create a default Bridge network for the Traefik
 In order for qbittorrent container to use the wireguard VPN tunnel
 wireguard container has been added to the qbittorrent docker compose
 file.
-  - qbittorrent container depends on the wireguard container. If
-    wireguard container is down, qbittorrent network will not work.
 
-  - Since, qbittorrent is using the wireguard container, port 9500
-    has been forwared to the host 9500 port from the wireguard container
+- qbittorrent container depends on the wireguard container. If
+  wireguard container is down, qbittorrent network will not work.
 
-  -  qbittorrent is using wireguard network interface. So, to access
-     the qbittorrent GUI, iptables rules had to be setup. Also, when the pc restarts
-     the wireguard container IP might change.
+- Since, qbittorrent is using the wireguard container, port 9500
+  has been forwared to the host 9500 port from the wireguard container
 
-      ```
-      # Forward traffic coming to port 9500 on the host to port 9500 on the WireGuard container
-      sudo iptables -t nat -A PREROUTING -p tcp --dport 9500 -j DNAT --to-destination 172.18.0.6:9500
+- qbittorrent is using wireguard network interface. So, to access
+  the qbittorrent GUI, iptables rules had to be setup. Also, when the pc restarts
+  the wireguard container IP might change.
 
-      # Forward traffic from the WireGuard container back to the host's port 9500
-      sudo iptables -t nat -A POSTROUTING -p tcp -d 172.18.0.6 --dport 9500 -j MASQUERADE
-      ```
-  - We can check the host ip geolocation by the following command. In that way
-    we can verify VPN is working.
-    ```
-    docker exec -it qbittorrent curl ipinfo.io
+  ```
+  # Forward traffic coming to port 9500 on the host to port 9500 on the WireGuard container
+  sudo iptables -t nat -A PREROUTING -p tcp --dport 9500 -j DNAT --to-destination 172.18.0.6:9500
 
-    {
-      "ip": "1.2.3.4",
-      "hostname": "1.2.3.4.in-addr.arpa",
-      "city": "Amsterdam",
-      "region": "North Holland",
-      "country": "NL",
-      "loc": "55.3740,41.8897",
-      "org": "Some Company",
-      "postal": "1234",
-      "timezone": "Europe/Amsterdam",
-      "readme": "https://ipinfo.io/missingauth"
-    }
-    ```
-  - We can check the wireguard VPN connection status with the following command
-    ```
-    docker exec -it wireguard wg
+  # Forward traffic from the WireGuard container back to the host's port 9500
+  sudo iptables -t nat -A POSTROUTING -p tcp -d 172.18.0.6 --dport 9500 -j MASQUERADE
+  ```
 
-    interface: wg0
-      public key: <public key>
-      private key: (hidden)
-      listening port: 56791
-      fwmark: 0xca6c
+- We can check the host ip geolocation by the following command. In that way
+  we can verify VPN is working.
 
-    peer: <public key>
-      preshared key: (hidden)
-      endpoint: <ip>:51820
-      allowed ips: 0.0.0.0/0, ::/0
-      latest handshake: 1 minute, 47 seconds ago
-      transfer: 12.69 MiB received, 822.64 KiB sent
-      persistent keepalive: every 15 seconds
-    ```
+  ```
+  docker exec -it qbittorrent curl ipinfo.io
+
+  {
+    "ip": "1.2.3.4",
+    "hostname": "1.2.3.4.in-addr.arpa",
+    "city": "Amsterdam",
+    "region": "North Holland",
+    "country": "NL",
+    "loc": "55.3740,41.8897",
+    "org": "Some Company",
+    "postal": "1234",
+    "timezone": "Europe/Amsterdam",
+    "readme": "https://ipinfo.io/missingauth"
+  }
+  ```
+
+- We can check the wireguard VPN connection status with the following command
+
+  ```
+  docker exec -it wireguard wg
+
+  interface: wg0
+    public key: <public key>
+    private key: (hidden)
+    listening port: 56791
+    fwmark: 0xca6c
+
+  peer: <public key>
+    preshared key: (hidden)
+    endpoint: <ip>:51820
+    allowed ips: 0.0.0.0/0, ::/0
+    latest handshake: 1 minute, 47 seconds ago
+    transfer: 12.69 MiB received, 822.64 KiB sent
+    persistent keepalive: every 15 seconds
+  ```
 
 # FAQ
 
 1. How to get the plex claim?
--> Go the the url and login: https://www.plex.tv/claim/
+   -> Go the the url and login: https://www.plex.tv/claim/

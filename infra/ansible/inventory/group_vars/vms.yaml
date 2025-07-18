@@ -2,6 +2,7 @@ apt_packages:
   - curl
   - vim
   - htop
+  - nfs-common
 
 # Kubernetes k0sctl configuration vars
 master1_ip: "192.168.1.151"
