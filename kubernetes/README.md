@@ -952,3 +952,25 @@ helm upgrade --install woodpecker woodpecker/woodpecker \
   --set server.secrets[0].data.WOODPECKER_GITEA_SECRET=$WOODPECKER_CLIENT_SECRET \
   --atomic
 ```
+
+# Monitoring
+
+To monitor the Kubernetes cluster, the kube-prometheus stack is deployed.
+This stack includes Prometheus Node Exporter, kube-state-metrics, Alertmanager,
+and Grafana. It provides a comprehensive set of default Grafana dashboards for
+tracking key system metrics such as CPU, memory, I/O, and network usage.
+
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+source .env
+helm upgrade --install kube-prometheus prometheus-community/kube-prometheus-stack \
+  -f kube-prometheus-stack/values.yaml \
+  --namespace monitoring \
+  --create-namespace \
+  --set grafana.adminUser=$GRAFANA_ADMIN \
+  --set grafana.adminPassword=$GRAFANA_PASSWORD \
+  --set grafana.ingress.hosts[0]=$GRAFANA_HOST \
+  --set grafana.ingress.tls[0].hosts[0]=$GRAFANA_HOST \
+  --atomic
+```
