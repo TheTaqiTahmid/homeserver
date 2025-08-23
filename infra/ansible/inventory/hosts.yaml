@@ -2,6 +2,7 @@ all:
   children:
     hypervisors:
     vms:
+    wireguard:
 
 hypervisors:
   children:
@@ -54,5 +55,12 @@ vm_group_2:
       ansible_ssh_private_key_file: "{{ ansible_ssh_private_key_file }}"
     vm9:
       ansible_host: 192.168.1.162
+      ansible_user: "{{ ansible_vm_user }}"
+      ansible_ssh_private_key_file: "{{ ansible_ssh_private_key_file }}"
+
+wireguard:
+  hosts:
+    vm10:
+      ansible_host: 192.168.1.174
       ansible_user: "{{ ansible_vm_user }}"
       ansible_ssh_private_key_file: "{{ ansible_ssh_private_key_file }}"

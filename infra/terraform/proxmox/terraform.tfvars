@@ -9,7 +9,7 @@ vms = [
     vm_id       = 105
     ip_address  = "192.168.1.151/24"
     gateway     = "192.168.1.1"
-    dns_servers = ["192.168.1.145", "1.1.1.1"]
+    dns_servers = ["1.1.1.1"]
     cores       = 2
     memory      = 4096
     disk_size   = 20
@@ -20,7 +20,7 @@ vms = [
     vm_id       = 205
     ip_address  = "192.168.1.161/24"
     gateway     = "192.168.1.1"
-    dns_servers = ["192.168.1.145", "1.1.1.1"]
+    dns_servers = ["1.1.1.1"]
     cores       = 2
     memory      = 4096
     disk_size   = 20
@@ -31,7 +31,7 @@ vms = [
     vm_id       = 301
     ip_address  = "192.168.1.172/24"
     gateway     = "192.168.1.1"
-    dns_servers = ["192.168.1.145", "1.1.1.1"]
+    dns_servers = ["1.1.1.1"]
     cores       = 2
     memory      = 4096
     disk_size   = 50
@@ -42,10 +42,21 @@ vms = [
     vm_id       = 302
     ip_address  = "192.168.1.173/24"
     gateway     = "192.168.1.1"
-    dns_servers = ["192.168.1.145", "1.1.1.1"]
+    dns_servers = ["1.1.1.1"]
     cores       = 2
     memory      = 4096
     disk_size   = 50
+  },
+  {
+    name        = "vm10"
+    node_name   = "homeserver3"
+    vm_id       = 303
+    ip_address  = "192.168.1.174/24"
+    gateway     = "192.168.1.1"
+    dns_servers = ["1.1.1.1"]
+    cores       = 2
+    memory      = 2048
+    disk_size   = 20
   }
 ]
 

@@ -960,6 +960,12 @@ This stack includes Prometheus Node Exporter, kube-state-metrics, Alertmanager,
 and Grafana. It provides a comprehensive set of default Grafana dashboards for
 tracking key system metrics such as CPU, memory, I/O, and network usage.
 
+The dashbaords are loaded as kubernetes configMaps. To create a persistant
+custom dashboard, one can create a configmap within the monitoring namespace
+following the example of existing dashboards. One way to generate dashboard,
+is to create the dashboard from the Grafana UI and then export the JSON file
+and embed it to the configmap.
+
 ```bash
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update

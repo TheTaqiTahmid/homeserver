@@ -190,6 +190,7 @@ server:
     WOODPECKER_ADMIN: "taqi"
     WOODPECKER_HOST: "woodpecker-server.woodpecker.svc.cluster.local:9000"
     WOODPECKER_GITEA: "true"
+    WOODPECKER_PLUGINS_PRIVILEGED: woodpeckerci/plugin-docker-buildx
 
   # -- Add extra environment variables from the secrets list
   extraSecretNamesForEnvFrom:

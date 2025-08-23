@@ -1257,11 +1257,12 @@ grafana:
   operator:
     ## Enable references to ConfigMaps containing dashboards in GrafanaDashboard CRs
     ## Set to true to allow dashboards to be loaded from ConfigMap references
-    dashboardsConfigMapRefEnabled: false
+    dashboardsConfigMapRefEnabled: true
 
     ## Annotations for GrafanaDashboard Cr
     ##
-    annotations: {}
+    annotations:
+      catagory: dashboard
     ## Labels that should be matched kind: Grafana instance
     ## Example: { app: grafana, category: dashboard }
     ##

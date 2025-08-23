@@ -19,7 +19,7 @@ spec:
         - name: docker-registry-credentials
       containers:
         - name: portfolio-app
-          image: "${DOCKER_REGISTRY_HOST}/taqi/portfolio/my-portfolio-app:latest"
+          image: "${DOCKER_REGISTRY_HOST}/taqi/portfolio:latest"
           imagePullPolicy: Always
           ports:
             - containerPort: 80
