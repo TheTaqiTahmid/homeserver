@@ -497,10 +497,7 @@ ingress:
     ingressClassName: "nginx"
     labels: {}
     annotations:
-      traefik.ingress.kubernetes.io/router.entrypoints: websecure
       cert-manager.io/cluster-issuer: "acme-issuer"
-      traefik.ingress.kubernetes.io/service.serversTransport: insecure-transport
-      traefik.ingress.kubernetes.io/router.middlewares: kube-system-ip-whitelist@kubernetescrd
     tls:
       - secretName: minio-console-tls
         hosts:

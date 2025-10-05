@@ -462,7 +462,10 @@ kubectl get secret wildcard-cert-secret --namespace=cert -o yaml \
 
 source .env
 helm upgrade --install adguard \
-  -f adguard/values.yaml \
+  --namespace adguard \
+  --create-namespace \
+  --atomic \
+  -f adguard-helm-chart/values.yaml \
   --set ingress.hosts[0].host=$ADGUARD_HOST \
   --set host=$ADGUARD_HOST \
   --atomic adguard-helm-chart
@@ -797,6 +800,23 @@ envsubst < cloud-native-pg/cloudnative-pg.yaml | kubectl apply -n immich -f -
 kubectl apply -f cloud-native-pg/backup.yaml -n immich
 ```
 
+## Barnman Cloud Plugin Implementation
+
+The cloudnative PG does not require the barman utility to be installed within
+the image anymore for backup and recovery. Instead barman plugin and the
+objectStore needs to be deployed in the destination namespace.
+
+Ref: https://cloudnative-pg.io/plugin-barman-cloud/docs/usage/
+
+```bash
+# Barman Cloud Plugin
+kubectl apply -f \
+https://github.com/cloudnative-pg/plugin-barman-cloud/releases/download/v0.6.0/manifest.yaml
+
+# Object Store
+envsubst < cloud-native-pg/objectStore.yaml | kubectl apply -n immich -f -
+```
+
 ## Recovery from Backup
 
 Ref: https://cloudnative-pg.io/documentation/1.20/recovery/
@@ -889,14 +909,14 @@ Finally, deploy the Immich helm chart with the following values:
 ```bash
 source .env
 helm upgrade --install \
-  --namespace immich immich oci://ghcr.io/immich-app/immich-charts/immich \
-  -f immich/values.yaml \
-  --set env.DB_USERNAME=$IMMICH_DB_USER \
-  --set env.DB_PASSWORD=$IMMICH_DB_PASSWORD \
-  --set env.DB_DATABASE_NAME=$IMMICH_DB_NAME \
-  --set server.ingress.main.hosts[0].host=$IMMICH_HOST \
-  --set server.ingress.main.tls[0].hosts[0]=$IMMICH_HOST \
-  --atomic
+    --namespace immich immich immich/immich-helm-chart \
+    -f immich/immich-helm-chart/values.yaml \
+    --set env.DB_USERNAME=$IMMICH_DB_USER \
+    --set env.DB_PASSWORD=$IMMICH_DB_PASSWORD \
+    --set env.DB_DATABASE_NAME=$IMMICH_DB_NAME \
+    --set server.ingress.main.hosts[0].host=$IMMICH_HOST \
+    --set server.ingress.main.tls[0].hosts[0]=$IMMICH_HOST \
+    --atomic
 ```
 
 # Cron Jobs for Periodic Tasks
@@ -979,4 +999,17 @@ helm upgrade --install kube-prometheus prometheus-community/kube-prometheus-stac
   --set grafana.ingress.hosts[0]=$GRAFANA_HOST \
   --set grafana.ingress.tls[0].hosts[0]=$GRAFANA_HOST \
   --atomic
+```
+
+# Paperless-ngx
+
+Paperless-ngx is a document management system that allows you to manage your
+documents in a digital way. It provides features such as document scanning,
+OCR (Optical Character Recognition), and a web interface for easy access
+to your documents. The main advantage is finding documents quickly and easily
+using powerful search capabilities.
+
+```bash
+source .env
+envsubst < paperless-ngx/manifest.yaml | kubectl apply -f -
 ```

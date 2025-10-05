@@ -5,17 +5,17 @@
 # These entries are shared between all the Immich components
 
 env:
-  # REDIS_HOSTNAME: '{{ printf "%s-redis-master" .Release.Name }}'
-  DB_HOSTNAME: pg-backup-rw.immich.svc.cluster.local
+  REDIS_HOSTNAME: '{{ printf "%s-valkey" .Release.Name }}'
+  DB_HOSTNAME: immich-database-rw.immich.svc.cluster.local
   DB_USERNAME: placeholder
   DB_DATABASE_NAME: immich
   # -- You should provide your own secret outside of this helm-chart and use `postgresql.global.postgresql.auth.existingSecret` to provide credentials to the postgresql instance
   DB_PASSWORD: placeholder
   IMMICH_IGNORE_MOUNT_CHECK_ERRORS: "true"
-  # IMMICH_MACHINE_LEARNING_URL: '{{ printf "http://%s-machine-learning:3003" .Release.Name }}'
+  IMMICH_MACHINE_LEARNING_URL: '{{ printf "http://%s-machine-learning:3003" .Release.Name }}'
 
 image:
-  tag: v1.119.0
+  tag: v2.0.1
 
 immich:
   metrics:
@@ -38,19 +38,22 @@ immich:
       enabled: true
       template: "{{y}}/{{y}}-{{MM}}-{{dd}}/{{filename}}"
 
-# Dependencies
-
-# DEPRECATED
-# The postgres subchart is deprecated and will be removed in chart version 0.10.0
-# See https://github.com/immich-app/immich-charts/issues/149 for more detail.
-postgresql:
+redis:
   enabled: false
 
-redis:
+valkey:
   enabled: true
-  architecture: standalone
-  auth:
-    enabled: false
+  image:
+    repository: docker.io/valkey/valkey
+    tag: 8.0-alpine
+    pullPolicy: IfNotPresent
+  persistence:
+    data:
+      enabled: true
+      size: 1Gi
+      # Optional: Set this to pvc to keep job queues persistent
+      type: pvc
+      accessMode: ReadWriteOnce
 
 # Immich components
 server:
@@ -74,7 +77,7 @@ server:
             - placeholder.immich.app
 
 machine-learning:
-  enabled: false # disabled due to resource constraints
+  enabled: true
   image:
     repository: ghcr.io/immich-app/immich-machine-learning
     pullPolicy: IfNotPresent

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: jellyfin-fix
+  namespace: media
+spec:
+  containers:
+  - name: helper
+    image: busybox
+    command: ["sleep", "3600"]
+    volumeMounts:
+    - name: jellyfin-config
+      mountPath: /config
+  volumes:
+  - name: jellyfin-config
+    persistentVolumeClaim:
+      claimName: plex-config-pvc
