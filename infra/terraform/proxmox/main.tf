@@ -1,20 +1,20 @@
 terraform {
-    required_providers {
-        proxmox = {
-            source  = "bpg/proxmox"
-            version = "0.78.2"
-        }
+  required_providers {
+    proxmox = {
+      source  = "bpg/proxmox"
+      version = "0.78.2"
     }
+  }
 }
 
 provider "proxmox" {
   endpoint  = var.pm_api_url
   api_token = var.pm_api_token
-  insecure = var.pm_insecure
+  insecure  = var.pm_insecure
 
   ssh {
-    agent = false
-    username = var.pm_user
+    agent       = false
+    username    = var.pm_user
     private_key = file(var.pm_ssh_private_key_path)
   }
 }
@@ -79,7 +79,7 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
 }
 
 resource "proxmox_virtual_environment_download_file" "ubuntu_cloud_image" {
-  for_each = toset(var.nodes)
+  for_each     = toset(var.nodes)
   content_type = "iso"
   datastore_id = "local"
   node_name    = each.key
@@ -88,7 +88,7 @@ resource "proxmox_virtual_environment_download_file" "ubuntu_cloud_image" {
 }
 
 data "proxmox_virtual_environment_hosts" "hosts" {
-  for_each = toset(var.nodes)
+  for_each  = toset(var.nodes)
   node_name = each.key
 
   depends_on = [proxmox_virtual_environment_vm.ubuntu_vm]
