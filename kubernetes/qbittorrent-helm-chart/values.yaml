@@ -55,13 +55,13 @@ config:
   webuiPort: 8080
 
 wireguard:
-  address: 10.182.199.210/32
-  privateKey: WNDT2JsSZWw4q5EgsUKkBEX1hpWlpJGUTV/ibfJZOVo=
+  address: "${WIREGUARD_IP}"
+  privateKey: "${WIREGUARD_PRIVATE_KEY}"
   mtu: 1329
-  dns: 10.128.0.1
+  dns: "${WIREGUARD_DNS}"
   listenPort: 51820
-  peerPublicKey: PyLCXAQT8KkM4T+dUsOQfn+Ub3pGxfGlxkIApuig+hk=
-  presharedKey: jSEf0xVUv/LwLmybp+LSM21Q2VOPbWPGcI/Dc4LLGkM=
-  endpoint: europe3.vpn.airdns.org:1637
+  peerPublicKey: "${WIREGUARD_PEER_PUBLIC_KEY}"
+  presharedKey: "${WIREGUARD_PRESHARED_KEY}"
+  endpoint: "${WIREGUARD_ENDPOINT}"
   allowedIPs: 0.0.0.0/0
   persistentKeepalive: 15
