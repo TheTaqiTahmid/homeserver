@@ -30,8 +30,8 @@ spec:
   - name: barman-cloud.cloudnative-pg.io
     isWALArchiver: true
     parameters:
-      barmanObjectName: immich-minio-store
+      barmanObjectName: immich-garage-store
 
   storage:
     storageClass: longhorn-2x
-    size: 5Gi
+    size: 32Gi

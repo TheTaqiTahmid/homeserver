@@ -860,6 +860,8 @@ the k3s cluster. The Immich deployment uses the existing postgres database
 for data storage. The Immich service is exposed via ingress and is accessible
 from the internet.
 
+## Database
+
 To use the existing postgres database, first create a new user and database
 for Immich in the postgres database.
 
@@ -883,7 +885,19 @@ LC_CTYPE 'en_US.UTF-8';
 CREATE EXTENSION vectors;
 ```
 
-Next, create or verify local disk for immich backup
+Currently, instead of Cloudnative-PG database, a single instance of postgres
+statefulset with recommended postgres + extensions image from Immich is used.
+
+```bash
+source .env
+envsubst < immich/database.yaml | kubectl apply -n immich -f -
+```
+
+## Persistant Storage for media
+
+Next, create or verify local disk for immich backup. For my setup, I have a
+dedicated server with a large disk that I want to use for immich media storage.
+The disk is mounted at /media/immich via NFS.
 
 ```bash
 ssh dockerhost
