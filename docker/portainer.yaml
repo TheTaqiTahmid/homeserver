@@ -1,9 +1,8 @@
-version: "3"
 services:
   portainer:
     image: portainer/portainer-ce:latest
-    ports:
-      - 9000:9000
+    # ports:
+    #   - 9000:9000
     volumes:
       - /home/taqi/docker/portainer/data:/data
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -22,7 +21,7 @@ services:
       - "traefik.http.routers.portainer-rtr.service=portainer-svc"
       - "traefik.http.services.portainer-svc.loadbalancer.server.port=9000"
       - "traefik.http.routers.traefik-rtr.middlewares=middlewares-rate-limit@file,middlewares-secure-headers@file"
-    command: 
+    command:
       --http-enabled
     environment:
       - TZ=${TZ}
