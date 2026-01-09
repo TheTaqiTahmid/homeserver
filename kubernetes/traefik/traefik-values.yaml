@@ -6,8 +6,9 @@ deployment:
 global:
   systemDefaultRegistry: ""
 image:
-  repository: rancher/mirrored-library-traefik
-  tag: 2.11.8
+  registry: docker.io
+  repository: traefik
+  tag: 3.6.6
 priorityClassName: system-cluster-critical
 providers:
   kubernetesIngress:
@@ -24,3 +25,10 @@ tolerations:
   - effect: NoSchedule
     key: node-role.kubernetes.io/master
     operator: Exists
+additionalArguments:
+  - "--entrypoints.web.transport.respondingtimeouts.readtimeout=600s"
+  - "--entrypoints.web.transport.respondingtimeouts.writetimeout=600s"
+  - "--entrypoints.web.transport.respondingtimeouts.idletimeout=600s"
+  - "--entrypoints.websecure.transport.respondingtimeouts.readtimeout=600s"
+  - "--entrypoints.websecure.transport.respondingtimeouts.writetimeout=600s"
+  - "--entrypoints.websecure.transport.respondingtimeouts.idletimeout=600s"

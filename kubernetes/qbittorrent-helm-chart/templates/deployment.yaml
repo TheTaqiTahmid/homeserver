@@ -13,6 +13,14 @@ spec:
       labels:
         app: {{ .Release.Name }}
     spec:
+      dnsPolicy: None
+      dnsConfig:
+        nameservers:
+          - 10.128.0.1
+        searches: []
+        options:
+          - name: ndots
+            value: "1"
       initContainers:
         - name: wireguard-init
           image: {{ .Values.wireguardImage.repository }}:{{ .Values.wireguardImage.tag }}
@@ -29,21 +37,18 @@ spec:
             - |
               set -x
               echo "Starting WireGuard initialization..."
-              mkdir -p /etc/wireguard
-              cp /config/wg_confs/wg0.conf /etc/wireguard/wg0.conf
-              chmod 600 /etc/wireguard/wg0.conf
-
+              mkdir -p /run/wireguard
+              cp /config/wg0.conf /run/wireguard/wg0.conf
+              chmod 600 /run/wireguard/wg0.conf
               if ! lsmod | grep -q wireguard; then
                   modprobe wireguard || echo "Failed to load wireguard module"
               fi
-
-              wg-quick up wg0 || echo "Failed to bring up WireGuard interface"
-
+              wg-quick up /run/wireguard/wg0.conf
               ip link show wg0
               wg show
           volumeMounts:
             - name: wireguard-config
-              mountPath: /config/wg_confs
+              mountPath: /config/
             - name: modules
               mountPath: /lib/modules
       containers:
@@ -75,9 +80,7 @@ spec:
             - -c
             - |
               while true; do
-                if ! ip link show wg0 > /dev/null 2>&1; then
-                  wg-quick up wg0
-                fi
+                ip link show wg0 >/dev/null 2>&1 || exit 1
                 sleep 30
               done
           ports:

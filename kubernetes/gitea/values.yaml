@@ -16,7 +16,7 @@ gitea:
 
 image:
   repository: gitea
-  tag: 1.24.2
+  tag: 1.25.3
 
 postgresql:
   enabled: false

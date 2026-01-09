@@ -74,6 +74,7 @@ default values,
 
 ```bash
 helm upgrade --install traefik traefik/traefik \
+  -f traefik/traefik-values.yaml \
   -n kube-system \
   --set ingressRoute.dashboard.enabled=true \
   --set ingressRoute.dashboard.matchRule='Host(`dashboard.traefik`)' \
@@ -516,7 +517,14 @@ network via ingress. It is accessible locally via loadbalancer IP address.
 source .env
 helm upgrade --install \
   qbittorrent qbittorrent-helm-chart/ \
+  -n media \
   --set ingress.host=$QBITTORRENT_HOST \
+  --set wireguard.address=$WIREGUARD_IP \
+  --set wireguard.peerPublicKey=$WIREGUARD_PEER_PUBLIC_KEY \
+  --set wireguard.presharedKey=$WIREGUARD_PRESHARED_KEY \
+  --set wireguard.endpoint=$WIREGUARD_ENDPOINT \
+  --set wireguard.dns=$WIREGUARD_DNS \
+  --set wireguard.privateKey=$WIREGUARD_PRIVATE_KEY \
   --atomic
 ```
 

@@ -9,7 +9,6 @@ data:
     Address = {{ .Values.wireguard.address }}
     PrivateKey = {{ .Values.wireguard.privateKey }}
     MTU = {{ .Values.wireguard.mtu }}
-    DNS = {{ .Values.wireguard.dns }}
     ListenPort = {{ .Values.wireguard.listenPort }}
 
     [Peer]
