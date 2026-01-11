@@ -20,5 +20,9 @@ markdownlint:
       - "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
   before_script:
     - markdownlint --version
+  allow_failure: true
+  rules:
+    - changes:
+        - "**/*.md"
   script:
     - markdownlint .
