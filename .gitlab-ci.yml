@@ -11,6 +11,12 @@ stages:
 include:
   - template: Security/SAST.gitlab-ci.yml
 
+sast:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "web"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH
+
 markdownlint:
   stage: lint
   image:
