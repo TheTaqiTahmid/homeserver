@@ -23,7 +23,7 @@ dast:
 markdown_lint:
   stage: lint
   image: ghcr.io/igorshubovych/markdownlint-cli:latest
-  allow_failures: true
+  allow_failure: true
   rules:
     - changes:
         - "**/*.md"
