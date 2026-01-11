@@ -11,12 +11,14 @@ stages:
 include:
   - template: Security/SAST.gitlab-ci.yml
 
-markdown_lint:
+markdownlint:
   stage: lint
-  image: ghcr.io/igorshubovych/markdownlint-cli:latest
-  allow_failure: true
-  rules:
-    - changes:
-        - "**/*.md"
+  image:
+    name: registry.gitlab.com/06kellyjac/docker_markdownlint-cli:0.28.1-alpine
+    entrypoint:
+      - "/usr/bin/env"
+      - "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+  before_script:
+    - markdownlint --version
   script:
     - markdownlint .
