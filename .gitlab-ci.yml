@@ -1,10 +1,10 @@
 workflow:
   rules:
+    - if: $CI_PIPELINE_SOURCE == "web"
+      when: always
     - if: $CI_PIPELINE_SOURCE == "merge request event"
-    - if: $CI_COMMIT_BRANHC && $CI_OPEN_MERGE_REQUESTS
-      when: never
     - if: $CI_COMMIT_BRANCH
-    - if: $CI_PIPELINE_TAG
+
 
 stages:
   - security
