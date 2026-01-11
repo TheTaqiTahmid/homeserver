@@ -1,0 +1,42 @@
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:18.5.5-ce.0
+    container_name: gitlab
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    hostname: gitlab.${DOMAINNAME}
+    ports:
+      - "2424:22"
+    volumes:
+      - "$GITLAB_HOME/config:/etc/gitlab"
+      - "$GITLAB_HOME/logs:/var/log/gitlab"
+      - "$GITLAB_HOME/data:/var/opt/gitlab"
+    shm_size: "256m"
+    networks:
+      - t3_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gitlab-rtr.entrypoints=websecure"
+      - "traefik.http.routers.gitlab-rtr.rule=Host(`gitlab.${DOMAINNAME}`)"
+      - "traefik.http.routers.gitlab-rtr.tls=true"
+      - "traefik.http.routers.gitlab-rtr.service=gitlab-svc"
+      - "traefik.http.services.gitlab-svc.loadbalancer.server.port=80"
+    environment:
+      GITLAB_ROOT_PASSWORD: ${GITLAB_ROOT_PASSWORD}
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url "https://gitlab.${DOMAINNAME}"
+        gitlab_rails['gitlab_shell_ssh_port'] = 2424
+        letsencrypt['enable'] = false
+        nginx['listen_port']  = 80
+        nginx['listen_https'] = false
+        postgresql['shared_buffers'] = '256MB'
+        sidekiq['max_concurrency'] = 4
+        sidekiq['concurrency'] = 1
+        puma['worker_timeout'] = 120
+        puma['worker_processes'] = 1
+        prometheus_monitoring['enable'] = false
+
+networks:
+  t3_proxy:
+    external: true

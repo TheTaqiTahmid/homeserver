@@ -13,14 +13,11 @@ services:
       - t3_proxy
     labels:
       - "traefik.enable=true"
-      # HTTP Routers
       - "traefik.http.routers.portainer-rtr.entrypoints=websecure"
       - "traefik.http.routers.portainer-rtr.rule=Host(`portainer.${DOMAINNAME}`)"
-      # HTTP Services
       - "traefik.http.routers.portainer-rtr.tls=true"
       - "traefik.http.routers.portainer-rtr.service=portainer-svc"
       - "traefik.http.services.portainer-svc.loadbalancer.server.port=9000"
-      - "traefik.http.routers.traefik-rtr.middlewares=middlewares-rate-limit@file,middlewares-secure-headers@file"
     command:
       --http-enabled
     environment:

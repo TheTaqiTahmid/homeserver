@@ -69,5 +69,4 @@ services:
       - "traefik.http.routers.api.entrypoints=websecure"
       - "traefik.http.routers.api.rule=Host(`traefik.${DOMAINNAME}`)"
       - "traefik.http.routers.api.service=api@internal"
-        # Middlewares
-      - "traefik.http.routers.api.middlewares=middlewares-rate-limit@file,middlewares-secure-headers@file"
+
