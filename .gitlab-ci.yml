@@ -1,7 +1,5 @@
 workflow:
   rules:
-    - if: $CI_PIPELINE_SOURCE == "web"
-      when: always
     - if: $CI_PIPELINE_SOURCE == "merge request event"
     - if: $CI_COMMIT_BRANCH
 
@@ -28,4 +26,4 @@ markdown_lint:
     - changes:
         - "**/*.md"
   script:
-    - markdownlint "**/*.md"
+    - markdownlint .
