@@ -4,12 +4,12 @@ workflow:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH
 
+stages:
+  - test
+  - lint
+
 include:
   - template: Security/SAST.gitlab-ci.yml
-
-stages:
-  - security
-  - test
 
 markdown_lint:
   stage: lint
