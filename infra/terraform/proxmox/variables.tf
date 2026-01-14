@@ -1,16 +1,28 @@
-# variables for minio backend configuration
-variable "minio_access_key" {
-  description = "MinIO access key"
+# variables for Terraform HTTP backend
+variable "http_username" {
+  description = "Username for HTTP backend"
+  type        = string
+  sensitive   = true
+}
+
+variable "http_password" {
+  description = "Password for HTTP backend"
+  type        = string
+  sensitive   = true
+}
+
+variable "http_address" {
+  description = "HTTP backend address"
   type        = string
 }
 
-variable "minio_secret_key" {
-  description = "MinIO secret key"
+variable "http_lock_address" {
+  description = "HTTP backend lock address"
   type        = string
 }
 
-variable "minio_endpoint" {
-  description = "MinIO API endpoint"
+variable "http_unlock_address" {
+  description = "HTTP backend unlock address"
   type        = string
 }
 
@@ -52,15 +64,15 @@ variable "pm_ssh_private_key_path" {
 variable "vms" {
   description = "List of VMs to create"
   type = list(object({
-    name      = string
-    node_name = string
-    vm_id     = number
-    ip_address = string
+    name        = string
+    node_name   = string
+    vm_id       = number
+    ip_address  = string
     dns_servers = list(string)
-    gateway   = string
-    cores     = number
-    memory    = number
-    disk_size = number
+    gateway     = string
+    cores       = number
+    memory      = number
+    disk_size   = number
   }))
 }
 
